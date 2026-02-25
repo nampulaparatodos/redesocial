@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}Utilizadores — Admin · SkilloraX{% endblock %}
+{% block content %}
+<div class="admin-wrap">
+  <aside class="admin-side">
+    <div style="padding:10px 4px 8px">
+      <div style="font-weight:900;font-size:1rem;color:var(--blue);padding:0 8px 10px;border-bottom:1px solid var(--border);margin-bottom:6px"><i class="fas fa-shield-alt"></i> Admin</div>
+      <div class="a-sec-lbl">Aprovações</div>
+      <a href="{{ url_for('admin_services') }}" class="a-link"><i class="fas fa-chalkboard-teacher"></i> Serviços</a>
+      <a href="{{ url_for('admin_requests') }}" class="a-link"><i class="fas fa-user-graduate"></i> Pedidos de Alunos</a>
+      <div class="a-sec-lbl">Gestão</div>
+      <a href="{{ url_for('admin_users') }}" class="a-link active"><i class="fas fa-users"></i> Utilizadores</a>
+      <a href="{{ url_for('admin_opportunities') }}" class="a-link"><i class="fas fa-star"></i> Oportunidades</a>
+      <a href="{{ url_for('admin_disciplines') }}" class="a-link"><i class="fas fa-book"></i> Disciplinas</a>
+      <div class="a-sec-lbl">Sistema</div>
+      <a href="{{ url_for('admin_logs') }}" class="a-link"><i class="fas fa-history"></i> Registos</a>
+      <a href="{{ url_for('admin_panel') }}" class="a-link"><i class="fas fa-th-large"></i> Painel Geral</a>
+    </div>
+  </aside>
+  <div class="admin-body">
+    <div class="pg-hdr-row">
+      <div class="pg-hdr" style="margin-bottom:0"><div class="pg-title">Utilizadores</div><div class="pg-sub">Gere alunos, explicadores e admins</div></div>
+      {% if current_user.is_admin_principal %}<a href="{{ url_for('admin_create_admin') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Novo Admin</a>{% endif %}
+    </div>
+    <div class="f-tabs" style="margin-bottom:14px;width:100%">
+      <a href="{{ url_for('admin_users') }}" class="f-tab {% if not role_filter %}active{% endif %}">Todos</a>
+      <a href="{{ url_for('admin_users', role='student') }}" class="f-tab {% if role_filter=='student' %}active{% endif %}">Alunos</a>
+      <a href="{{ url_for('admin_users', role='tutor') }}" class="f-tab {% if role_filter=='tutor' %}active{% endif %}">Explicadores</a>
+      <a href="{{ url_for('admin_users', role='admin') }}" class="f-tab {% if role_filter=='admin' %}active{% endif %}">Admins</a>
+    </div>
+
+    <!-- Mobile -->
+    <div class="mobile-list" style="display:none">
+      {% for u in users %}
+      <div class="card card-p" style="margin-bottom:8px">
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div class="u-ava" style="width:48px;height:48px;border-radius:50%;font-size:.95rem;background:linear-gradient(135deg,{% if u.role=='tutor' %}#e65100,var(--amber-b){% elif u.role=='admin' %}#6a1b9a,#ab47bc{% else %}var(--green-b),#1b5e20{% endif %});flex-shrink:0">
+            {% if u.photo_url %}<img src="{{ u.photo_url }}" alt="">{% else %}{{ u.full_name[0].upper() }}{% endif %}
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:800;font-size:.9rem">{{ u.full_name }}</div>
+            <div style="font-size:.73rem;color:var(--ink-2)">{{ u.email }}</div>
+            <div style="font-size:.72rem;color:var(--ink-3)">{{ u.phone or '—' }}{% if u.whatsapp %} · WA: {{ u.whatsapp }}{% endif %}</div>
+            <div style="margin:6px 0;display:flex;gap:4px;flex-wrap:wrap">
+              <span class="badge {% if u.role=='tutor' %}badge-amber{% elif u.role=='admin' %}badge-purple{% else %}badge-blue{% endif %}">{{ u.role|title }}</span>
+              <span class="badge badge-{{ u.status }}">{{ u.status|title }}</span>
+            </div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap">
+              {% if u.status == 'active' %}
+              <form method="post" action="{{ url_for('admin_user_action', uid=u.id, action='suspended') }}"><button class="btn btn-warning btn-sm" type="submit">Suspender</button></form>
+              <form method="post" action="{{ url_for('admin_user_action', uid=u.id, action='blocked') }}"><button class="btn btn-danger btn-sm" type="submit">Bloquear</button></form>
+              {% else %}
+              <form method="post" action="{{ url_for('admin_user_action', uid=u.id, action='active') }}"><button class="btn btn-success btn-sm" type="submit">Activar</button></form>
+              {% endif %}
+              {% if not u.is_admin_principal %}
+              <form method="post" action="{{ url_for('admin_user_action', uid=u.id, action='delete') }}" onsubmit="return confirm('Eliminar {{ u.full_name }}?')"><button class="btn btn-sm" style="background:var(--red-l);color:var(--red-b);border:1px solid #ef9a9a" type="submit"><i class="fas fa-trash"></i></button></form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Utilizador</th><th>Foto</th><th>Email</th><th>Telefone</th><th>WhatsApp</th><th>Tipo</th><th>Estado</th><th>Registado</th><th>Ações</th></tr></thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td>
+              <div class="user-item">
+                <div class="u-ava" style="background:linear-gradient(135deg,{% if u.role=='tutor' %}#e65100,var(--amber-b){% elif u.role=='admin' %}#6a1b9a,#ab47bc{% else %}var(--green-b),#1b5e20{% endif %})">
+                  {% if u.photo_url %}<img src="{{ u.photo_url }}" alt="">{% else %}{{ u.full_name[0].upper() }}{% endif %}
+                </div>
+                <div><div class="u-name">{{ u.full_name }}{% if u.is_admin_principal %} <span class="badge badge-purple" style="font-size:.6rem">Principal</span>{% endif %}</div><div class="u-sub">@{{ u.username }}</div></div>
+              </div>
+            </td>
+            <td>{% if u.photo_url %}<img src="{{ u.photo_url }}" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover">{% else %}<span style="color:var(--red-b);font-size:.72rem;font-weight:700">Sem foto</span>{% endif %}</td>
+            <td style="font-size:.8rem;color:var(--ink-2)">{{ u.email }}</td>
+            <td style="font-size:.8rem">{{ u.phone or '—' }}</td>
+            <td style="font-size:.78rem">{% if u.whatsapp %}<a href="https://wa.me/{{ u.whatsapp|replace('+','')|replace(' ','')|replace('-','') }}" target="_blank" style="color:#25d366"><i class="fab fa-whatsapp"></i> {{ u.whatsapp }}</a>{% else %}<span style="color:var(--ink-3)">—</span>{% endif %}</td>
+            <td><span class="badge {% if u.role=='tutor' %}badge-amber{% elif u.role=='admin' %}badge-purple{% else %}badge-blue{% endif %}">{{ u.role|title }}</span></td>
+            <td><span class="badge badge-{{ u.status }}">{{ u.status|title }}</span></td>
+            <td style="font-size:.78rem;color:var(--ink-2)">{{ u.created_at.strftime('%d/%m/%y') }}</td>
+            <td><div style="display:flex;gap:4px;flex-wrap:wrap">
+              {% if u.status=='active' %}
+              <form method="post" action="{{ url_for('admin_user_action', uid=u.id, action='suspended') }}"><button class="act-btn act-reject" type="submit" title="Suspender" style="border-radius:var(--r);width:auto;padding:4px 8px;font-size:.72rem"><i class="fas fa-pause"></i></button></form>
+              <form method="post" action="{{ url_for('admin_user_action', uid=u.id, action='blocked') }}"><button class="act-btn" type="submit" title="Bloquear" style="background:var(--red-l);color:var(--red-b);border-radius:var(--r);width:auto;padding:4px 8px;font-size:.72rem"><i class="fas fa-ban"></i></button></form>
+              {% else %}
+              <form method="post" action="{{ url_for('admin_user_action', uid=u.id, action='active') }}"><button class="act-btn act-approve" type="submit" title="Activar" style="border-radius:var(--r);width:auto;padding:4px 8px;font-size:.72rem"><i class="fas fa-check"></i></button></form>
+              {% endif %}
+              {% if current_user.is_admin_principal and u.role!='admin' %}
+              <form method="post" action="{{ url_for('admin_user_action', uid=u.id, action='make_admin') }}"><button class="act-btn act-eye" type="submit" title="Tornar Admin" style="border-radius:var(--r);width:auto;padding:4px 8px;font-size:.72rem"><i class="fas fa-shield-alt"></i></button></form>
+              {% endif %}
+              {% if not u.is_admin_principal %}
+              <form method="post" action="{{ url_for('admin_user_action', uid=u.id, action='delete') }}" onsubmit="return confirm('Eliminar {{ u.full_name }}?')"><button class="act-btn act-del" type="submit" title="Eliminar"><i class="fas fa-trash"></i></button></form>
+              {% endif %}
+            </div></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<style>@media(max-width:700px){.tbl-wrap{display:none}.mobile-list{display:block!important}}</style>
+{% endblock %}

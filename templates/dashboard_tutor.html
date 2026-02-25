@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block title %}Painel do Explicador — SkilloraX{% endblock %}
+{% block content %}
+<div class="dash-wrap">
+  <aside class="dash-side">
+    <div class="card">
+      <div class="cover-box" style="background:linear-gradient(135deg,#bf360c,var(--amber-b) 60%,#ffcc80)">
+        <div class="cover-ava" style="background:linear-gradient(135deg,var(--amber-b),#e65100)">
+          {% if current_user.photo_url %}<img src="{{ current_user.photo_url }}" alt="">{% else %}{{ current_user.full_name[0].upper() }}{% endif %}
+        </div>
+        <a href="{{ url_for('profile_edit') }}" class="cover-ava-edit"><i class="fas fa-camera"></i></a>
+      </div>
+      <div class="side-info">
+        <div class="side-name">{{ current_user.full_name }}</div>
+        <div class="side-role"><i class="fas fa-chalkboard-teacher" style="color:var(--amber-b)"></i> Explicador{% if current_user.province %} · {{ current_user.province }}{% endif %}</div>
+        {% if current_user.description %}<div style="font-size:.77rem;color:var(--ink-2);margin-top:5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ current_user.description }}</div>{% endif %}
+        {% if current_user.whatsapp or current_user.phone %}
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          {% if current_user.whatsapp %}<a href="https://wa.me/{{ current_user.whatsapp|replace('+','')|replace(' ','')|replace('-','') }}" target="_blank" class="btn btn-wa btn-sm" style="font-size:.72rem"><i class="fab fa-whatsapp"></i> {{ current_user.whatsapp }}</a>{% endif %}
+          {% if current_user.phone %}<a href="tel:{{ current_user.phone }}" class="btn btn-call btn-sm" style="font-size:.72rem"><i class="fas fa-phone"></i> Ligar</a>{% endif %}
+        </div>
+        {% endif %}
+        <div class="side-stats">
+          <div class="sstat"><div class="sstat-n">{{ services|length }}</div><div class="sstat-l">Serviços</div></div>
+          <div class="sstat"><div class="sstat-n">{{ services|selectattr('status','equalto','aprovado')|list|length }}</div><div class="sstat-l">Aprovados</div></div>
+          <div class="sstat"><div class="sstat-n">{{ notifications|selectattr('is_read','equalto',False)|list|length }}</div><div class="sstat-l">Avisos</div></div>
+        </div>
+      </div>
+      <div class="s-menu">
+        <a href="{{ url_for('tutor_service_create') }}" class="s-nav-item"><i class="fas fa-plus-circle" style="color:var(--blue)"></i> Novo Serviço</a>
+        <a href="{{ url_for('alunos') }}" class="s-nav-item"><i class="fas fa-user-graduate"></i> Ver Alunos</a>
+        <a href="{{ url_for('explore') }}" class="s-nav-item"><i class="fas fa-chalkboard-teacher"></i> Ver Explicadores</a>
+        <a href="{{ url_for('oportunidades') }}" class="s-nav-item"><i class="fas fa-star"></i> Oportunidades</a>
+        <div class="s-divider"></div>
+        <a href="{{ url_for('profile_edit') }}" class="s-nav-item"><i class="fas fa-user-edit"></i> Editar Perfil</a>
+        <a href="{{ url_for('logout') }}" class="s-nav-item red"><i class="fas fa-sign-out-alt"></i> Sair</a>
+      </div>
+    </div>
+  </aside>
+
+  <div>
+    {% set unread = notifications|selectattr('is_read','equalto',False)|list %}
+    {% if unread %}
+    <div class="card card-p" style="margin-bottom:12px;border-left:4px solid var(--blue)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-weight:700;font-size:.92rem"><i class="fas fa-bell" style="color:var(--blue)"></i> Novidades ({{ unread|length }})</div>
+        <form method="post" action="{{ url_for('mark_notifications_read') }}"><button class="btn btn-outline btn-sm" type="submit">Lido</button></form>
+      </div>
+      {% for n in unread[:5] %}
+      <div style="display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--border-l);align-items:flex-start">
+        <div style="width:7px;height:7px;background:var(--blue);border-radius:50%;flex-shrink:0;margin-top:6px"></div>
+        <div><div style="font-size:.84rem">{{ n.message }}</div><div style="font-size:.7rem;color:var(--ink-3);margin-top:2px">{{ n.created_at.strftime('%d/%m/%Y %H:%M') }}</div></div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if opportunities %}
+    <div class="card" style="margin-bottom:12px">
+      <div class="list-card-hdr"><h3><i class="fas fa-star" style="color:var(--amber-b)"></i> Oportunidades</h3><a href="{{ url_for('oportunidades') }}" style="font-size:.78rem;color:var(--blue);font-weight:700">Ver todas</a></div>
+      {% for o in opportunities[:3] %}
+      <div class="list-row">
+        <div style="width:34px;height:34px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.95rem;background:{% if o.category=='bolsa' %}var(--amber-l){% elif o.category=='estagio' %}var(--green-l){% else %}var(--blue-l){% endif %}">
+          {% if o.category=='bolsa' %}🎓{% elif o.category=='estagio' %}💼{% elif o.category=='evento' %}📅{% else %}📢{% endif %}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.title }}</div>
+          <div style="font-size:.7rem;color:var(--ink-3)">{{ o.created_at.strftime('%d/%m/%Y') }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-weight:800;font-size:1rem">Os meus Serviços</div>
+      <a href="{{ url_for('tutor_service_create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Novo</a>
+    </div>
+
+    {% if services %}
+    {% for s in services %}
+    <div class="req-card {{ s.status }}" style="margin-bottom:10px">
+      <div style="display:flex;gap:10px">
+        {% if s.photo_url %}
+        <img src="{{ s.photo_url }}" alt="" style="width:64px;height:64px;border-radius:var(--r2);object-fit:cover;flex-shrink:0" onerror="this.style.display='none'">
+        {% endif %}
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px">
+            <div style="display:flex;flex-wrap:wrap;gap:3px">{% for d in s.disciplines.split(',')[:3] %}<span class="disc-chip">{{ d.strip() }}</span>{% endfor %}</div>
+            <span class="badge badge-{{ s.status }}">{{ s.status|title }}</span>
+          </div>
+          <div style="font-size:.78rem;color:var(--ink-2);display:flex;gap:10px;flex-wrap:wrap">
+            <span><i class="fas fa-video"></i> {{ s.lesson_type|title }}</span>
+            {% if s.province %}<span><i class="fas fa-map-marker-alt"></i> {{ s.province }}</span>{% endif %}
+            {% if s.price %}<span style="color:var(--green-b);font-weight:700"><i class="fas fa-tag"></i> {{ s.price }}</span>{% endif %}
+          </div>
+          {% if s.status == 'pendente' %}<div style="margin-top:6px;font-size:.78rem;color:var(--amber);background:var(--amber-l);padding:5px 8px;border-radius:6px"><i class="fas fa-clock"></i> A aguardar aprovação</div>{% endif %}
+          {% if s.status == 'aprovado' %}<div style="margin-top:6px;font-size:.78rem;color:var(--green);background:var(--green-l);padding:5px 8px;border-radius:6px"><i class="fas fa-check-circle"></i> Visível para alunos</div>{% endif %}
+          <div style="font-size:.7rem;color:var(--ink-3);margin-top:4px">{{ s.created_at.strftime('%d/%m/%Y') }}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
+          <a href="{{ url_for('tutor_service_edit', sid=s.id) }}" class="act-btn act-eye"><i class="fas fa-edit"></i></a>
+          <form method="post" action="{{ url_for('tutor_service_delete', sid=s.id) }}" onsubmit="return confirm('Eliminar?')">
+            <button class="act-btn act-del" type="submit"><i class="fas fa-trash"></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty card card-p">
+      <i class="fas fa-chalkboard-teacher"></i>
+      <h3>Nenhum serviço ainda</h3>
+      <p>Cria o teu primeiro serviço para ficares visível para os alunos.</p>
+      <a href="{{ url_for('tutor_service_create') }}" class="btn btn-primary btn-sm" style="margin-top:12px"><i class="fas fa-plus"></i> Criar Serviço</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+<a href="{{ url_for('tutor_service_create') }}" class="fab"><i class="fas fa-plus"></i></a>
+{% endblock %}

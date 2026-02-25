@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Oportunidades — SkilloraX{% endblock %}
+{% block content %}
+<div style="max-width:900px;margin:0 auto;padding:16px 12px 80px">
+  <div class="pg-hdr">
+    <div class="pg-title">Oportunidades</div>
+    <div class="pg-sub">Bolsas de estudo, estágios, eventos e avisos para a comunidade</div>
+  </div>
+
+  <!-- Category filters -->
+  <div class="f-tabs" style="margin-bottom:16px;width:100%">
+    <a href="{{ url_for('oportunidades') }}" class="f-tab {% if not category %}active{% endif %}">Todas</a>
+    <a href="{{ url_for('oportunidades', category='bolsa') }}" class="f-tab {% if category=='bolsa' %}active{% endif %}">🎓 Bolsas</a>
+    <a href="{{ url_for('oportunidades', category='estagio') }}" class="f-tab {% if category=='estagio' %}active{% endif %}">💼 Estágios</a>
+    <a href="{{ url_for('oportunidades', category='evento') }}" class="f-tab {% if category=='evento' %}active{% endif %}">📅 Eventos</a>
+    <a href="{{ url_for('oportunidades', category='aviso') }}" class="f-tab {% if category=='aviso' %}active{% endif %}">📢 Avisos</a>
+  </div>
+
+  {% if opportunities %}
+  <div style="display:flex;flex-direction:column;gap:12px">
+    {% for o in opportunities %}
+    <div class="card">
+      <!-- Optional photo -->
+      {% if o.photo_url %}
+      <img class="opp-photo" src="{{ o.photo_url }}" alt="{{ o.title }}" style="width:100%;height:180px;object-fit:cover" onerror="this.style.display='none'">
+      {% endif %}
+
+      <div style="padding:14px 16px">
+        <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
+          <div style="flex:1;min-width:0">
+            <div style="margin-bottom:6px">
+              <span class="opp-cat {% if o.category=='bolsa' %}badge-amber{% elif o.category=='estagio' %}badge-green{% elif o.category=='evento' %}badge-blue{% else %}badge-red{% endif %}" style="border-radius:50px;padding:3px 10px;font-size:.7rem;font-weight:800">
+                {% if o.category=='bolsa' %}🎓 Bolsa de Estudo{% elif o.category=='estagio' %}💼 Estágio{% elif o.category=='evento' %}📅 Evento{% else %}📢 Aviso{% endif %}
+              </span>
+            </div>
+            <div style="font-weight:800;font-size:1rem;margin-bottom:8px">{{ o.title }}</div>
+            <div style="font-size:.85rem;color:var(--ink-2);line-height:1.6;white-space:pre-line">{{ o.content }}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid var(--border-l)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#64b5f6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.7rem;color:#fff">{{ o.admin.full_name[0].upper() }}</div>
+            <div style="font-size:.75rem;color:var(--ink-2)">{{ o.admin.full_name }} · {{ o.created_at.strftime('%d/%m/%Y') }}</div>
+          </div>
+          <div style="font-size:.72rem;color:var(--ink-3)">Para: {{ o.visibility }}</div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty card card-p">
+    <i class="fas fa-star"></i>
+    <h3>Nenhuma oportunidade disponível</h3>
+    <p>O Admin publicará em breve oportunidades para a comunidade.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

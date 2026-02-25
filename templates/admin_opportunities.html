@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Oportunidades — Admin · SkilloraX{% endblock %}
+{% block content %}
+<div class="admin-wrap">
+  <aside class="admin-side">
+    <div style="padding:10px 4px 8px">
+      <div style="font-weight:900;font-size:1rem;color:var(--blue);padding:0 8px 10px;border-bottom:1px solid var(--border);margin-bottom:6px"><i class="fas fa-shield-alt"></i> Admin</div>
+      <div class="a-sec-lbl">Aprovações</div>
+      <a href="{{ url_for('admin_services') }}" class="a-link"><i class="fas fa-chalkboard-teacher"></i> Serviços</a>
+      <a href="{{ url_for('admin_requests') }}" class="a-link"><i class="fas fa-user-graduate"></i> Pedidos de Alunos</a>
+      <div class="a-sec-lbl">Gestão</div>
+      <a href="{{ url_for('admin_users') }}" class="a-link"><i class="fas fa-users"></i> Utilizadores</a>
+      <a href="{{ url_for('admin_opportunities') }}" class="a-link active"><i class="fas fa-star"></i> Oportunidades</a>
+      <a href="{{ url_for('admin_disciplines') }}" class="a-link"><i class="fas fa-book"></i> Disciplinas</a>
+      <div class="a-sec-lbl">Sistema</div>
+      <a href="{{ url_for('admin_logs') }}" class="a-link"><i class="fas fa-history"></i> Registos</a>
+      <a href="{{ url_for('admin_panel') }}" class="a-link"><i class="fas fa-th-large"></i> Painel Geral</a>
+    </div>
+  </aside>
+  <div class="admin-body">
+    <div class="pg-hdr"><div class="pg-title">Oportunidades</div><div class="pg-sub">Publica bolsas, estágios, eventos e avisos para a comunidade</div></div>
+    <div class="card card-p" style="margin-bottom:16px">
+      <div style="font-weight:700;font-size:.9rem;margin-bottom:12px"><i class="fas fa-plus-circle" style="color:var(--blue)"></i> Nova Oportunidade</div>
+      <form method="post">
+        <div class="row-2">
+          <div class="form-group"><label class="form-label">Título <span class="req">*</span></label><input name="title" required class="form-control" placeholder="Ex: Bolsa INAGBE 2025"></div>
+          <div class="form-group"><label class="form-label">Categoria <span class="req">*</span></label>
+            <select name="category" class="form-select">
+              <option value="bolsa">🎓 Bolsa de Estudo</option>
+              <option value="estagio">💼 Estágio</option>
+              <option value="evento">📅 Evento</option>
+              <option value="aviso">📢 Aviso</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Descrição <span class="req">*</span></label><textarea name="content" required class="form-control" rows="4" placeholder="Descreve a oportunidade, requisitos, prazos, links de candidatura..."></textarea></div>
+        <div class="form-group">
+          <label class="form-label">Foto (opcional)</label>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div id="oppImgPrev" style="width:60px;height:60px;border-radius:var(--r2);background:var(--surface-3);display:flex;align-items:center;justify-content:center;color:var(--ink-3);flex-shrink:0;overflow:hidden"><i class="fas fa-image" style="font-size:1.3rem"></i></div>
+            <div style="flex:1">
+              <input type="url" name="photo_url" id="oppImg" class="form-control" placeholder="https://link-da-imagem.jpg (opcional)" oninput="prevOpp(this.value)" style="font-size:.84rem">
+              <div class="form-hint">Imagem de capa da oportunidade (opcional)</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Visibilidade</label>
+          <select name="visibility" class="form-select">
+            <option value="all">👥 Todos (alunos + explicadores)</option>
+            <option value="students">🎓 Apenas Alunos</option>
+            <option value="tutors">📚 Apenas Explicadores</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Publicar Oportunidade</button>
+      </form>
+    </div>
+
+    {% if opportunities %}
+    <div class="card">
+      <div class="list-card-hdr"><h3>Publicadas ({{ opportunities|length }})</h3></div>
+      {% for o in opportunities %}
+      <div class="list-row" style="align-items:flex-start">
+        {% if o.photo_url %}<img src="{{ o.photo_url }}" alt="" style="width:56px;height:56px;border-radius:var(--r2);object-fit:cover;flex-shrink:0" onerror="this.style.display='none'">{% endif %}
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px">
+            <span class="badge {% if o.category=='bolsa' %}badge-amber{% elif o.category=='estagio' %}badge-green{% elif o.category=='evento' %}badge-blue{% else %}badge-red{% endif %}">
+              {% if o.category=='bolsa' %}🎓{% elif o.category=='estagio' %}💼{% elif o.category=='evento' %}📅{% else %}📢{% endif %} {{ o.category|title }}
+            </span>
+            <span style="font-weight:700;font-size:.88rem">{{ o.title }}</span>
+          </div>
+          <div style="font-size:.8rem;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ o.content }}</div>
+          <div style="font-size:.7rem;color:var(--ink-3);margin-top:3px">{{ o.created_at.strftime('%d/%m/%Y') }} · Para: {{ o.visibility }}</div>
+        </div>
+        <div class="list-row-acts">
+          <form method="post" action="{{ url_for('admin_opportunity_delete', oid=o.id) }}" onsubmit="return confirm('Eliminar esta oportunidade?')">
+            <button class="act-btn act-del" type="submit"><i class="fas fa-trash"></i></button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty card card-p"><i class="fas fa-star"></i><h3>Nenhuma oportunidade</h3><p>Usa o formulário acima para publicar a primeira.</p></div>
+    {% endif %}
+  </div>
+</div>
+<script>function prevOpp(u){const p=document.getElementById('oppImgPrev');if(u&&u.startsWith('http')){p.innerHTML='<img src="'+u+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML=\'<i class=\\\"fas fa-image\\\" style=\\\"font-size:1.3rem\\\"></i>\'">';}}</script>
+{% endblock %}

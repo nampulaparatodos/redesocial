@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Editar Perfil — SkilloraX{% endblock %}
+{% block content %}
+<div style="max-width:580px;margin:0 auto;padding:16px 12px 80px">
+  <!-- Profile Preview Card -->
+  <div class="card" style="margin-bottom:12px">
+    <div class="cover-box" style="background:linear-gradient(135deg,{% if current_user.role=='tutor' %}#bf360c,var(--amber-b){% else %}#0d47a1,var(--blue){% endif %});border-radius:var(--r2) var(--r2) 0 0">
+      <div class="cover-ava" id="avaPreview">
+        {% if current_user.photo_url %}<img src="{{ current_user.photo_url }}" alt="" id="avaImg">{% else %}<span id="avaLetter">{{ current_user.full_name[0].upper() }}</span>{% endif %}
+      </div>
+    </div>
+    <div style="padding:40px 16px 14px">
+      <div style="font-weight:800;font-size:1rem">{{ current_user.full_name }}</div>
+      <div style="font-size:.78rem;color:var(--ink-2);margin-top:2px">{{ current_user.role|title }} · {{ current_user.email }}</div>
+    </div>
+  </div>
+
+  <!-- Photo -->
+  <div class="card card-p" style="margin-bottom:10px">
+    <div style="font-weight:700;font-size:.9rem;margin-bottom:12px"><i class="fas fa-camera" style="color:var(--blue)"></i> Foto de Perfil <span style="color:var(--red-b);font-size:.75rem">* Obrigatória</span></div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div id="miniPreview" style="width:56px;height:56px;border-radius:50%;overflow:hidden;border:2px solid var(--border);background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--ink-3);flex-shrink:0">
+        {% if current_user.photo_url %}<img src="{{ current_user.photo_url }}" alt="" style="width:100%;height:100%;object-fit:cover">{% else %}<i class="fas fa-user"></i>{% endif %}
+      </div>
+      <div style="flex:1">
+        <input type="url" id="photoInput" class="form-control" value="{{ current_user.photo_url or '' }}" placeholder="https://link-da-foto-real.jpg" oninput="livePreview(this.value)" style="font-size:.85rem">
+        <div class="form-hint">Cola o link de uma foto real tua (Google Fotos, Imgur, etc.)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Form -->
+  <div class="card card-p">
+    <div style="font-weight:700;font-size:.9rem;margin-bottom:14px"><i class="fas fa-user-edit" style="color:var(--blue)"></i> Dados Pessoais</div>
+    <form method="post" id="editForm">
+      <input type="hidden" name="photo_url" id="photoUrlHidden" value="{{ current_user.photo_url or '' }}">
+      <div class="form-group"><label class="form-label">Nome Completo <span class="req">*</span></label><input name="full_name" required class="form-control" value="{{ current_user.full_name }}"></div>
+      <div class="row-2">
+        <div class="form-group"><label class="form-label">Telefone <span class="req">*</span></label>
+          <div class="input-icon-wrap"><i class="fas fa-phone input-icon"></i><input name="phone" required type="tel" class="form-control" value="{{ current_user.phone or '' }}" placeholder="+258 8X XXX XXXX"></div>
+        </div>
+        <div class="form-group"><label class="form-label">WhatsApp <span class="req">*</span></label>
+          <div class="input-icon-wrap"><i class="fab fa-whatsapp input-icon" style="color:#25d366"></i><input name="whatsapp" required type="tel" class="form-control" value="{{ current_user.whatsapp or '' }}" placeholder="+258 8X XXX XXXX"></div>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Província</label>
+        <select name="province" class="form-select">
+          <option value="">Seleccionar...</option>
+          {% for p in ['Maputo Cidade','Maputo','Gaza','Inhambane','Sofala','Manica','Tete','Zambezia','Nampula','Niassa','Cabo Delgado'] %}
+          <option value="{{ p }}" {% if current_user.province==p %}selected{% endif %}>{{ p }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      {% if current_user.role == 'student' %}
+      <div class="divider"></div>
+      <div style="font-weight:600;font-size:.82rem;color:var(--ink-2);margin-bottom:10px">Dados Académicos</div>
+      <div class="form-group"><label class="form-label">Universidade / Instituto</label><input name="university" class="form-control" value="{{ current_user.university or '' }}" placeholder="Ex: Universidade Eduardo Mondlane"></div>
+      <div class="row-2">
+        <div class="form-group"><label class="form-label">Curso</label><input name="course" class="form-control" value="{{ current_user.course or '' }}" placeholder="Ex: Engenharia Informática"></div>
+        <div class="form-group"><label class="form-label">Ano</label>
+          <select name="academic_year" class="form-select">
+            <option value="">—</option>
+            {% for y in ['1º Ano','2º Ano','3º Ano','4º Ano','5º Ano','Licenciatura','Mestrado','Doutoramento'] %}
+            <option {% if current_user.academic_year==y %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      {% elif current_user.role == 'tutor' %}
+      <div class="form-group"><label class="form-label">Apresentação / Bio</label>
+        <textarea name="description" class="form-control" rows="4" placeholder="Formação, experiência, método de ensino...">{{ current_user.description or '' }}</textarea>
+      </div>
+      {% endif %}
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="submit" class="btn btn-primary" onclick="syncPhoto()"><i class="fas fa-save"></i> Guardar</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline">Cancelar</a>
+      </div>
+    </form>
+
+    <div class="divider"></div>
+    <div style="font-weight:700;font-size:.85rem;color:var(--red-b);margin-bottom:8px">Zona de Perigo</div>
+    <form method="post" action="{{ url_for('profile_delete') }}" onsubmit="return confirm('Eliminar a tua conta? Esta acção é irreversível.')">
+      <button type="submit" class="btn btn-sm" style="background:var(--red-l);color:var(--red-b);border:1.5px solid #ef9a9a"><i class="fas fa-trash"></i> Eliminar Conta</button>
+    </form>
+  </div>
+</div>
+<script>
+function livePreview(url) {
+  const mini = document.getElementById('miniPreview');
+  const ava = document.getElementById('avaPreview');
+  if(url && url.startsWith('http')) {
+    mini.innerHTML = '<img src="'+url+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML=\'<i class=\\\"fas fa-user\\\"></i>\'">';
+    const existing = document.getElementById('avaImg');
+    if(existing) { existing.src = url; }
+    else {
+      const letter = document.getElementById('avaLetter');
+      if(letter) letter.style.display='none';
+      const img = document.createElement('img');
+      img.id='avaImg'; img.src=url;
+      img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%';
+      ava.appendChild(img);
+    }
+  }
+}
+function syncPhoto() {
+  document.getElementById('photoUrlHidden').value = document.getElementById('photoInput').value;
+}
+</script>
+{% endblock %}

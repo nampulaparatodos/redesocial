@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Criar Admin — SkilloraX{% endblock %}
+{% block content %}
+<div style="max-width:480px;margin:0 auto;padding:20px 14px 80px">
+  <div class="pg-hdr"><div class="pg-title">Criar Novo Administrador</div><div class="pg-sub">Apenas o admin principal pode criar novos admins</div></div>
+  <div class="card card-p">
+    <form method="post">
+      <div class="form-group"><label class="form-label">Nome Completo <span class="req">*</span></label><input name="full_name" required class="form-control" placeholder="Nome do admin"></div>
+      <div class="form-group"><label class="form-label">Email <span class="req">*</span></label><input name="email" type="email" required class="form-control" placeholder="email@skillorax.com"></div>
+      <div class="form-group"><label class="form-label">Senha <span class="req">*</span></label><input name="password" type="password" required minlength="6" class="form-control" placeholder="Mínimo 6 caracteres"></div>
+      <div style="background:var(--amber-l);border-radius:var(--r);padding:10px 12px;font-size:.82rem;color:var(--amber);margin-bottom:14px"><i class="fas fa-exclamation-triangle"></i> Este utilizador terá acesso total ao painel de administração.</div>
+      <div style="display:flex;gap:8px">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-user-shield"></i> Criar Admin</button>
+        <a href="{{ url_for('admin_users') }}" class="btn btn-outline">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block title %}{% if service %}Editar Serviço{% else %}Criar Serviço{% endif %} — SkilloraX{% endblock %}
+{% block content %}
+<div style="max-width:600px;margin:0 auto;padding:16px 12px 80px">
+  <div class="pg-hdr">
+    <div class="pg-title">{% if service %}Editar Serviço{% else %}Registar Serviço de Explicação{% endif %}</div>
+    <div class="pg-sub">Preenche todos os dados — o Admin irá analisar e aprovar</div>
+  </div>
+
+  <div class="card card-p">
+    <!-- Photo preview -->
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding:12px;background:var(--surface-2);border-radius:var(--r2)">
+      <div id="photoPreview" style="width:80px;height:80px;border-radius:var(--r2);overflow:hidden;background:var(--surface-3);display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--ink-3);flex-shrink:0">
+        {% if service and service.photo_url %}<img src="{{ service.photo_url }}" alt="" style="width:100%;height:100%;object-fit:cover">{% else %}<i class="fas fa-image"></i>{% endif %}
+      </div>
+      <div style="flex:1">
+        <label class="form-label">Foto do Serviço <span class="req">*</span></label>
+        <input type="url" id="photoInput" class="form-control" value="{{ service.photo_url if service else '' }}" placeholder="https://link-da-foto.jpg" oninput="previewPhoto(this.value)" style="font-size:.83rem">
+        <div class="form-hint">Foto real tua a leccionar ou foto profissional</div>
+      </div>
+    </div>
+
+    <form method="post" id="serviceForm">
+      <input type="hidden" name="photo_url" id="photoUrlHidden" value="{{ service.photo_url if service else '' }}">
+
+      <div class="form-group">
+        <label class="form-label">Disciplinas <span class="req">*</span></label>
+        <select name="disciplines" class="form-select" required id="discSelect" onchange="addDisc(this.value)">
+          <option value="">Seleccionar disciplina...</option>
+          {% for d in disciplines %}<option value="{{ d.name }}">{{ d.name }}</option>{% endfor %}
+        </select>
+        <div id="discTags" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">
+          {% if service %}{% for d in service.disciplines.split(',') %}<span class="disc-chip" style="cursor:pointer" onclick="removeDisc(this,'{{ d.strip() }}')">{{ d.strip() }} ×</span>{% endfor %}{% endif %}
+        </div>
+        <input type="hidden" name="disciplines" id="discHidden" value="{{ service.disciplines if service else '' }}">
+        <div class="form-hint">Podes seleccionar várias disciplinas</div>
+      </div>
+
+      <div class="row-2">
+        <div class="form-group"><label class="form-label">Modalidade <span class="req">*</span></label>
+          <select name="lesson_type" class="form-select" required>
+            {% for lt in ['online','presencial','ambos'] %}
+            <option value="{{ lt }}" {% if service and service.lesson_type==lt %}selected{% endif %}>{{ lt|title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Província <span class="req">*</span></label>
+          <select name="province" class="form-select" required>
+            <option value="">Seleccionar...</option>
+            {% for p in ['Maputo Cidade','Maputo','Gaza','Inhambane','Sofala','Manica','Tete','Zambezia','Nampula','Niassa','Cabo Delgado'] %}
+            <option value="{{ p }}" {% if service and service.province==p %}selected{% endif %}>{{ p }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="form-group"><label class="form-label">Preço por Hora</label>
+          <div class="input-icon-wrap"><i class="fas fa-tag input-icon"></i><input name="price" class="form-control" value="{{ service.price if service else '' }}" placeholder="Ex: 500 MT/hora"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Horário Disponível</label>
+          <div class="input-icon-wrap"><i class="fas fa-clock input-icon"></i><input name="schedule" class="form-control" value="{{ service.schedule if service else '' }}" placeholder="Ex: Seg-Sab 14h-20h"></div>
+        </div>
+      </div>
+
+      <div class="form-group"><label class="form-label">WhatsApp <span class="req">*</span></label>
+        <div class="input-icon-wrap"><i class="fab fa-whatsapp input-icon" style="color:#25d366"></i>
+          <input name="whatsapp" required type="tel" class="form-control" value="{{ current_user.whatsapp or '' }}" placeholder="+258 8X XXX XXXX">
+        </div>
+        <div class="form-hint">Os alunos contactam-te directamente</div>
+      </div>
+
+      <div class="form-group"><label class="form-label">Descrição / Experiência</label>
+        <textarea name="description" class="form-control" rows="4" placeholder="Formação académica, anos de experiência, método, resultados obtidos...">{{ service.description if service else '' }}</textarea>
+      </div>
+
+      <div style="background:var(--amber-l);border-radius:var(--r);padding:10px 12px;font-size:.8rem;color:var(--amber);margin-bottom:14px">
+        <i class="fas fa-clock"></i> O formulário vai para aprovação do Admin. Receberás notificação.
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="submit" class="btn btn-primary" onclick="syncAll()"><i class="fas fa-paper-plane"></i> {% if service %}Actualizar{% else %}Enviar para Aprovação{% endif %}</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+let selectedDiscs = [{% if service %}{% for d in service.disciplines.split(',') %}'{{ d.strip() }}',{% endfor %}{% endif %}];
+
+function addDisc(val) {
+  if(!val || selectedDiscs.includes(val)) return;
+  selectedDiscs.push(val);
+  updateDiscDisplay();
+  document.getElementById('discSelect').value = '';
+}
+
+function removeDisc(el, val) {
+  selectedDiscs = selectedDiscs.filter(d => d !== val);
+  el.remove();
+  updateDiscDisplay();
+}
+
+function updateDiscDisplay() {
+  const container = document.getElementById('discTags');
+  container.innerHTML = '';
+  selectedDiscs.forEach(d => {
+    const span = document.createElement('span');
+    span.className = 'disc-chip';
+    span.style.cursor = 'pointer';
+    span.innerHTML = d + ' ×';
+    span.onclick = () => removeDisc(span, d);
+    container.appendChild(span);
+  });
+  document.getElementById('discHidden').value = selectedDiscs.join(',');
+}
+
+function previewPhoto(url) {
+  const p = document.getElementById('photoPreview');
+  if(url && url.startsWith('http')) {
+    p.innerHTML = '<img src="'+url+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML=\'<i class=\\\"fas fa-image\\\"></i>\'">';
+  }
+}
+
+function syncAll() {
+  document.getElementById('photoUrlHidden').value = document.getElementById('photoInput').value;
+  document.getElementById('discHidden').value = selectedDiscs.join(',');
+}
+</script>
+{% endblock %}

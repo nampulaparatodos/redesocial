@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}{% if req %}Editar Pedido{% else %}Novo Pedido de Explicador{% endif %} — SkilloraX{% endblock %}
+{% block content %}
+<div style="max-width:580px;margin:0 auto;padding:16px 12px 80px">
+  <div class="pg-hdr">
+    <div class="pg-title">{% if req %}Editar Pedido{% else %}Pedido de Explicador{% endif %}</div>
+    <div class="pg-sub">O Admin analisa e aprova — depois recebes os contactos do explicador</div>
+  </div>
+  <div class="card card-p">
+    <form method="post">
+      <div class="form-group">
+        <label class="form-label">Disciplina <span class="req">*</span></label>
+        <select name="discipline" class="form-select" required>
+          <option value="">Seleccionar disciplina...</option>
+          {% for d in disciplines %}
+          <option value="{{ d.name }}" {% if req and req.discipline==d.name %}selected{% endif %}>{{ d.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="row-2">
+        <div class="form-group"><label class="form-label">Modalidade <span class="req">*</span></label>
+          <select name="lesson_type" class="form-select" required>
+            <option value="">Seleccionar...</option>
+            {% for lt in ['online','presencial','ambos'] %}
+            <option value="{{ lt }}" {% if req and req.lesson_type==lt %}selected{% endif %}>{{ lt|title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Província</label>
+          <select name="province" class="form-select">
+            <option value="">Seleccionar...</option>
+            {% for p in ['Maputo Cidade','Maputo','Gaza','Inhambane','Sofala','Manica','Tete','Zambezia','Nampula','Niassa','Cabo Delgado'] %}
+            <option value="{{ p }}" {% if (req and req.province==p) or (not req and current_user.province==p) %}selected{% endif %}>{{ p }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="form-group"><label class="form-label">Universidade</label>
+          <input name="university" class="form-control" value="{{ req.university if req else (current_user.university or '') }}" placeholder="Ex: UEM, UP, UCM...">
+        </div>
+        <div class="form-group"><label class="form-label">Disponibilidade</label>
+          <div class="input-icon-wrap"><i class="fas fa-clock input-icon"></i><input name="availability" class="form-control" value="{{ req.availability if req else '' }}" placeholder="Ex: Fins de semana 14h-18h"></div>
+        </div>
+      </div>
+
+      <div class="form-group"><label class="form-label">Mensagem</label>
+        <textarea name="message" class="form-control" rows="4" placeholder="Descreve o teu nível, dificuldades, objectivos, prazo...">{{ req.message if req else '' }}</textarea>
+      </div>
+
+      {% if tutors %}
+      <div class="form-group"><label class="form-label">Explicador Preferido (opcional)</label>
+        <select name="tutor_id" class="form-select">
+          <option value="">Qualquer explicador disponível</option>
+          {% for t in tutors %}
+          <option value="{{ t.tutor.id }}" {% if req and req.tutor_id==t.tutor.id %}selected{% endif %}>{{ t.tutor.full_name }} — {{ t.disciplines[:35] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endif %}
+
+      <div style="background:var(--blue-l);border-radius:var(--r);padding:10px 12px;font-size:.8rem;color:#0d47a1;margin-bottom:14px">
+        <i class="fas fa-info-circle"></i> Quando aprovado, receberás o WhatsApp e telefone do explicador por notificação.
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> {% if req %}Actualizar{% else %}Enviar Pedido{% endif %}</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

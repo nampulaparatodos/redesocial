@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% block title %}Meu Painel — SkilloraX{% endblock %}
+{% block content %}
+<div class="dash-wrap">
+  <!-- SIDEBAR -->
+  <aside class="dash-side">
+    <div class="card">
+      <div class="cover-box">
+        <div class="cover-ava">
+          {% if current_user.photo_url %}<img src="{{ current_user.photo_url }}" alt="">{% else %}{{ current_user.full_name[0].upper() }}{% endif %}
+        </div>
+        <a href="{{ url_for('profile_edit') }}" class="cover-ava-edit"><i class="fas fa-camera"></i></a>
+      </div>
+      <div class="side-info">
+        <div class="side-name">{{ current_user.full_name }}</div>
+        <div class="side-role"><i class="fas fa-user-graduate" style="color:var(--green-b)"></i> Aluno
+          {% if current_user.university %} · {{ current_user.university }}{% endif %}
+        </div>
+        {% if current_user.province %}<div style="font-size:.73rem;color:var(--ink-3);margin-top:2px"><i class="fas fa-map-marker-alt"></i> {{ current_user.province }}</div>{% endif %}
+        {% if current_user.whatsapp or current_user.phone %}
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+          {% if current_user.whatsapp %}<a href="https://wa.me/{{ current_user.whatsapp|replace('+','')|replace(' ','')|replace('-','') }}" target="_blank" class="btn btn-wa btn-sm" style="font-size:.72rem"><i class="fab fa-whatsapp"></i> {{ current_user.whatsapp }}</a>{% endif %}
+        </div>
+        {% endif %}
+        <div class="side-stats">
+          <div class="sstat"><div class="sstat-n">{{ my_requests|length }}</div><div class="sstat-l">Pedidos</div></div>
+          <div class="sstat"><div class="sstat-n">{{ my_requests|selectattr('status','equalto','aprovado')|list|length }}</div><div class="sstat-l">Aprovados</div></div>
+          <div class="sstat"><div class="sstat-n">{{ notifications|selectattr('is_read','equalto',False)|list|length }}</div><div class="sstat-l">Avisos</div></div>
+        </div>
+      </div>
+      <div class="s-menu">
+        <a href="{{ url_for('request_create') }}" class="s-nav-item"><i class="fas fa-plus-circle" style="color:var(--blue)"></i> Novo Pedido</a>
+        <a href="{{ url_for('explore') }}" class="s-nav-item"><i class="fas fa-chalkboard-teacher"></i> Ver Explicadores</a>
+        <a href="{{ url_for('alunos') }}" class="s-nav-item"><i class="fas fa-user-graduate"></i> Ver Alunos</a>
+        <a href="{{ url_for('oportunidades') }}" class="s-nav-item"><i class="fas fa-star"></i> Oportunidades</a>
+        <div class="s-divider"></div>
+        <a href="{{ url_for('profile_edit') }}" class="s-nav-item"><i class="fas fa-user-edit"></i> Editar Perfil</a>
+        <a href="{{ url_for('logout') }}" class="s-nav-item red"><i class="fas fa-sign-out-alt"></i> Sair</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div>
+    <!-- Notifications -->
+    {% set unread = notifications|selectattr('is_read','equalto',False)|list %}
+    {% if unread %}
+    <div class="card card-p" style="margin-bottom:12px;border-left:4px solid var(--blue)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-weight:700;font-size:.92rem"><i class="fas fa-bell" style="color:var(--blue)"></i> Novidades ({{ unread|length }})</div>
+        <form method="post" action="{{ url_for('mark_notifications_read') }}"><button class="btn btn-outline btn-sm" type="submit"><i class="fas fa-check-double"></i> Lido</button></form>
+      </div>
+      {% for n in unread[:5] %}
+      <div style="display:flex;gap:9px;padding:7px 0;border-bottom:1px solid var(--border-l);align-items:flex-start">
+        <div style="width:7px;height:7px;background:var(--blue);border-radius:50%;flex-shrink:0;margin-top:6px"></div>
+        <div><div style="font-size:.84rem">{{ n.message }}</div><div style="font-size:.7rem;color:var(--ink-3);margin-top:2px">{{ n.created_at.strftime('%d/%m/%Y %H:%M') }}</div></div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Opportunities -->
+    {% if opportunities %}
+    <div class="card" style="margin-bottom:12px">
+      <div class="list-card-hdr"><h3><i class="fas fa-star" style="color:var(--amber-b)"></i> Oportunidades Recentes</h3><a href="{{ url_for('oportunidades') }}" style="font-size:.78rem;color:var(--blue);font-weight:700">Ver todas</a></div>
+      {% for o in opportunities[:3] %}
+      <div class="list-row">
+        <div style="width:36px;height:36px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;background:{% if o.category=='bolsa' %}var(--amber-l){% elif o.category=='estagio' %}var(--green-l){% else %}var(--blue-l){% endif %}">
+          {% if o.category=='bolsa' %}🎓{% elif o.category=='estagio' %}💼{% elif o.category=='evento' %}📅{% else %}📢{% endif %}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:.87rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.title }}</div>
+          <div style="font-size:.72rem;color:var(--ink-3)">{{ o.created_at.strftime('%d/%m/%Y') }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- My requests -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-weight:800;font-size:1rem">Os meus Pedidos</div>
+      <a href="{{ url_for('request_create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Novo</a>
+    </div>
+
+    {% if my_requests %}
+    {% for r in my_requests %}
+    <div class="req-card {{ r.status }}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px">
+            <span style="font-weight:800;font-size:.92rem">{{ r.discipline }}</span>
+            <span class="badge badge-{{ r.status }}">{{ r.status|title }}</span>
+          </div>
+          <div style="font-size:.8rem;color:var(--ink-2);display:flex;gap:10px;flex-wrap:wrap">
+            <span><i class="fas fa-video"></i> {{ r.lesson_type|title }}</span>
+            {% if r.availability %}<span><i class="fas fa-clock"></i> {{ r.availability }}</span>{% endif %}
+            {% if r.province %}<span><i class="fas fa-map-marker-alt"></i> {{ r.province }}</span>{% endif %}
+          </div>
+          {% if r.message %}<div style="margin-top:6px;font-size:.8rem;color:var(--ink-2);background:var(--surface-2);padding:7px 10px;border-radius:var(--r)">"{{ r.message }}"</div>{% endif %}
+
+          {% if r.status == 'aprovado' and r.tutor %}
+          <div style="margin-top:10px;background:var(--green-l);border-radius:var(--r);padding:10px 12px">
+            <div style="font-weight:800;color:var(--green);font-size:.85rem;margin-bottom:6px"><i class="fas fa-check-circle"></i> Pedido Aprovado!</div>
+            <div style="font-size:.82rem;color:#1b5e20;margin-bottom:8px"><strong>Explicador:</strong> {{ r.tutor.full_name }}</div>
+            <div class="contact-row">
+              {% if r.tutor.whatsapp %}
+              <a href="https://wa.me/{{ r.tutor.whatsapp|replace('+','')|replace(' ','')|replace('-','') }}" target="_blank" class="btn btn-wa btn-sm"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+              {% endif %}
+              {% if r.tutor.phone %}
+              <a href="tel:{{ r.tutor.phone }}" class="btn btn-call btn-sm"><i class="fas fa-phone"></i> Ligar</a>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+          <div style="font-size:.7rem;color:var(--ink-3);margin-top:5px">{{ r.created_at.strftime('%d/%m/%Y') }}</div>
+        </div>
+        {% if r.status == 'pendente' %}
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          <a href="{{ url_for('request_edit', rid=r.id) }}" class="act-btn act-eye"><i class="fas fa-edit"></i></a>
+          <form method="post" action="{{ url_for('request_delete', rid=r.id) }}" onsubmit="return confirm('Eliminar este pedido?')">
+            <button class="act-btn act-del" type="submit"><i class="fas fa-trash"></i></button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty card card-p">
+      <i class="fas fa-paper-plane"></i>
+      <h3>Nenhum pedido ainda</h3>
+      <p>Faz o teu primeiro pedido para encontrar um explicador!</p>
+      <a href="{{ url_for('request_create') }}" class="btn btn-primary btn-sm" style="margin-top:12px"><i class="fas fa-plus"></i> Fazer Pedido</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+<a href="{{ url_for('request_create') }}" class="fab"><i class="fas fa-plus"></i></a>
+{% endblock %}

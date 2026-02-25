@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}SkilloraX — Explicadores e Alunos em Moçambique{% endblock %}
+{% block content %}
+<!-- HERO -->
+<div style="background:linear-gradient(135deg,#0d47a1 0%,var(--blue) 55%,#42a5f5 100%);color:#fff;padding:52px 20px 48px;text-align:center">
+  <div style="max-width:580px;margin:0 auto">
+    <div style="font-weight:900;font-size:clamp(1.9rem,5vw,2.8rem);letter-spacing:-.04em;line-height:1.15;margin-bottom:14px">Encontra o teu Explicador Ideal</div>
+    <div style="font-size:clamp(.88rem,2.5vw,1rem);opacity:.88;margin-bottom:30px;line-height:1.65">Plataforma que conecta alunos e explicadores qualificados em todo o Moçambique — com contacto directo por WhatsApp</div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <a href="{{ url_for('register_student') }}" class="btn btn-lg" style="background:#fff;color:var(--blue);font-weight:800"><i class="fas fa-user-graduate"></i> Sou Aluno</a>
+      <a href="{{ url_for('register_tutor') }}" class="btn btn-lg" style="background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.4);font-weight:800"><i class="fas fa-chalkboard-teacher"></i> Sou Explicador</a>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div style="background:var(--surface);border-bottom:1px solid var(--border);padding:14px 20px">
+  <div style="max-width:700px;margin:0 auto;display:flex;justify-content:space-around;flex-wrap:wrap;gap:14px">
+    <div style="text-align:center"><div style="font-weight:900;font-size:1.4rem;color:var(--blue)">{{ tutors|length }}+</div><div style="font-size:.75rem;color:var(--ink-2)">Explicadores</div></div>
+    <div style="text-align:center"><div style="font-weight:900;font-size:1.4rem;color:var(--green-b)">{{ requests|length }}+</div><div style="font-size:.75rem;color:var(--ink-2)">Alunos</div></div>
+    <div style="text-align:center"><div style="font-weight:900;font-size:1.4rem;color:var(--amber-b)">11</div><div style="font-size:.75rem;color:var(--ink-2)">Províncias</div></div>
+    <div style="text-align:center"><div style="font-weight:900;font-size:1.4rem">🇲🇿</div><div style="font-size:.75rem;color:var(--ink-2)">Moçambique</div></div>
+  </div>
+</div>
+
+<div style="max-width:1000px;margin:0 auto;padding:20px 12px 80px">
+  <!-- HOW IT WORKS -->
+  <div style="text-align:center;margin-bottom:20px">
+    <div style="font-weight:800;font-size:1.2rem;margin-bottom:4px">Como Funciona</div>
+    <div style="font-size:.83rem;color:var(--ink-2)">Em 4 passos simples</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:28px">
+    {% for ico, col, step, desc in [
+      ('fas fa-user-plus','var(--blue)','1. Regista-te','Cria conta com foto real e WhatsApp'),
+      ('fas fa-paper-plane','var(--green-b)','2. Publica','Alunos pedem, explicadores oferecem'),
+      ('fas fa-shield-alt','var(--amber-b)','3. Admin Aprova','Perfis verificados e seguros'),
+      ('fab fa-whatsapp','#25d366','4. Contacto Directo','WhatsApp e chamada directa')
+    ] %}
+    <div class="card card-p" style="text-align:center">
+      <div style="width:44px;height:44px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:1.1rem;color:{{ col }}"><i class="{{ ico }}"></i></div>
+      <div style="font-weight:800;font-size:.88rem;margin-bottom:3px">{{ step }}</div>
+      <div style="font-size:.77rem;color:var(--ink-2)">{{ desc }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- TUTORS PREVIEW -->
+  {% if tutors %}
+  <div style="font-weight:800;font-size:1rem;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+    <span><i class="fas fa-chalkboard-teacher" style="color:var(--blue)"></i> Explicadores Disponíveis</span>
+    <a href="{{ url_for('explore') }}" style="font-size:.8rem;color:var(--blue);font-weight:700">Ver todos →</a>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:24px">
+    {% for s in tutors %}
+    <div class="tutor-card">
+      {% if s.photo_url or s.tutor.photo_url %}
+      <img style="width:100%;height:140px;object-fit:cover" src="{{ s.photo_url or s.tutor.photo_url }}" alt="" onerror="this.style.display='none'">
+      {% else %}
+      <div style="height:100px;background:linear-gradient(135deg,var(--blue-l),var(--blue-m));display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:900;color:var(--blue)">{{ s.tutor.full_name[0].upper() }}</div>
+      {% endif %}
+      <div style="padding:10px">
+        <div style="font-weight:800;font-size:.88rem;margin-bottom:3px">{{ s.tutor.full_name }}</div>
+        <div style="font-size:.73rem;color:var(--ink-2);margin-bottom:6px">{{ s.lesson_type|title }}{% if s.province %} · {{ s.province }}{% endif %}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px">{% for d in s.disciplines.split(',')[:3] %}<span class="disc-chip">{{ d.strip() }}</span>{% endfor %}</div>
+        <a href="{{ url_for('login') }}" class="btn btn-outline btn-sm btn-block" style="font-size:.78rem"><i class="fas fa-sign-in-alt"></i> Entra para contactar</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- OPPORTUNITIES PREVIEW -->
+  {% if opportunities %}
+  <div style="font-weight:800;font-size:1rem;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+    <span><i class="fas fa-star" style="color:var(--amber-b)"></i> Oportunidades Recentes</span>
+    <a href="{{ url_for('oportunidades') }}" style="font-size:.8rem;color:var(--blue);font-weight:700">Ver todas →</a>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px">
+    {% for o in opportunities %}
+    <div class="card" style="display:flex;overflow:hidden">
+      {% if o.photo_url %}<img src="{{ o.photo_url }}" alt="" style="width:80px;height:80px;object-fit:cover;flex-shrink:0" onerror="this.style.display='none'">{% endif %}
+      <div style="padding:12px;flex:1;min-width:0">
+        <span class="badge {% if o.category=='bolsa' %}badge-amber{% elif o.category=='estagio' %}badge-green{% elif o.category=='evento' %}badge-blue{% else %}badge-red{% endif %}" style="margin-bottom:4px;display:inline-flex">
+          {% if o.category=='bolsa' %}🎓{% elif o.category=='estagio' %}💼{% elif o.category=='evento' %}📅{% else %}📢{% endif %} {{ o.category|title }}
+        </span>
+        <div style="font-weight:700;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ o.title }}</div>
+        <div style="font-size:.72rem;color:var(--ink-3);margin-top:2px">{{ o.created_at.strftime('%d/%m/%Y') }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- CTA -->
+  <div style="background:linear-gradient(135deg,#0d47a1,var(--blue));border-radius:var(--r3);padding:26px 20px;text-align:center;color:#fff">
+    <div style="font-weight:900;font-size:1.15rem;margin-bottom:6px">Pronto para começar?</div>
+    <div style="font-size:.83rem;opacity:.85;margin-bottom:18px">Junta-te à comunidade e encontra o teu explicador hoje</div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <a href="{{ url_for('register_student') }}" class="btn" style="background:#fff;color:var(--blue);font-weight:800"><i class="fas fa-user-graduate"></i> Registar como Aluno</a>
+      <a href="{{ url_for('register_tutor') }}" class="btn" style="background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.35);font-weight:700"><i class="fas fa-chalkboard-teacher"></i> Ser Explicador</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

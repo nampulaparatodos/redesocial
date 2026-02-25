@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Disciplinas — Admin · SkilloraX{% endblock %}
+{% block content %}
+<div class="admin-wrap">
+  <aside class="admin-side">
+    <div style="padding:10px 4px 8px">
+      <div style="font-weight:900;font-size:1rem;color:var(--blue);padding:0 8px 10px;border-bottom:1px solid var(--border);margin-bottom:6px"><i class="fas fa-shield-alt"></i> Admin</div>
+      <div class="a-sec-lbl">Aprovações</div>
+      <a href="{{ url_for('admin_services') }}" class="a-link"><i class="fas fa-chalkboard-teacher"></i> Serviços de Explicadores</a>
+      <a href="{{ url_for('admin_requests') }}" class="a-link"><i class="fas fa-user-graduate"></i> Pedidos de Alunos</a>
+      <div class="a-sec-lbl">Gestão</div>
+      <a href="{{ url_for('admin_users') }}" class="a-link"><i class="fas fa-users"></i> Utilizadores</a>
+      <a href="{{ url_for('admin_opportunities') }}" class="a-link"><i class="fas fa-star"></i> Oportunidades</a>
+      <a href="{{ url_for('admin_disciplines') }}" class="a-link active"><i class="fas fa-book"></i> Disciplinas</a>
+      <div class="a-sec-lbl">Sistema</div>
+      <a href="{{ url_for('admin_logs') }}" class="a-link"><i class="fas fa-history"></i> Registos</a>
+      <a href="{{ url_for('admin_panel') }}" class="a-link"><i class="fas fa-th-large"></i> Painel Geral</a>
+    </div>
+  </aside>
+  <div class="admin-body">
+    <div class="pg-hdr"><div class="pg-title">Gestão de Disciplinas</div><div class="pg-sub">Adiciona disciplinas que aparecem nos formulários de pedido e serviço</div></div>
+
+    <!-- Add form -->
+    <div class="card card-p" style="margin-bottom:16px">
+      <div style="font-weight:700;font-size:.9rem;margin-bottom:12px"><i class="fas fa-plus-circle" style="color:var(--blue)"></i> Adicionar Nova Disciplina</div>
+      <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+        <div class="form-group" style="flex:2;min-width:180px;margin-bottom:0">
+          <label class="form-label">Nome da Disciplina <span class="req">*</span></label>
+          <input name="name" required class="form-control" placeholder="Ex: Álgebra, Direito Penal, C++...">
+        </div>
+        <div class="form-group" style="flex:1;min-width:140px;margin-bottom:0">
+          <label class="form-label">Categoria</label>
+          <select name="category" class="form-select">
+            {% for cat in ['Exactas','Ciências','Tecnologia','Línguas','Sociais','Saúde','Artes','Geral'] %}
+            <option>{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm" style="flex-shrink:0"><i class="fas fa-plus"></i> Adicionar</button>
+      </form>
+    </div>
+
+    <!-- Grouped by category -->
+    {% set categories = disciplines | map(attribute='category') | unique | list | sort %}
+    {% for cat in categories %}
+    {% set cat_discs = disciplines | selectattr('category','equalto',cat) | list %}
+    {% if cat_discs %}
+    <div class="card" style="margin-bottom:12px">
+      <div class="list-card-hdr">
+        <h3>{{ cat }} <span style="font-size:.75rem;font-weight:500;color:var(--ink-2)">({{ cat_discs|length }})</span></h3>
+      </div>
+      <div style="padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px">
+        {% for d in cat_discs %}
+        <div style="display:flex;align-items:center;gap:4px;background:var(--surface-2);border:1px solid var(--border);border-radius:50px;padding:4px 8px 4px 12px">
+          <span style="font-size:.82rem;font-weight:600">{{ d.name }}</span>
+          <form method="post" action="{{ url_for('admin_discipline_delete', did=d.id) }}" onsubmit="return confirm('Eliminar {{ d.name }}?')">
+            <button type="submit" style="width:20px;height:20px;border-radius:50%;border:none;background:var(--red-l);color:var(--red-b);cursor:pointer;font-size:.7rem;display:flex;align-items:center;justify-content:center;padding:0;line-height:1">×</button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    {% if not disciplines %}
+    <div class="empty card card-p"><i class="fas fa-book"></i><h3>Nenhuma disciplina</h3><p>Adiciona disciplinas acima.</p></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

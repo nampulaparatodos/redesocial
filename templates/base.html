@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>{% block title %}SkilloraX{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1877f2;--blue-d:#1565c0;--blue-l:#e7f3ff;--blue-m:#c8e0ff;
+  --green:#2e7d32;--green-l:#e8f5e9;--green-b:#43a047;
+  --amber:#e65100;--amber-l:#fff3e0;--amber-b:#fb8c00;
+  --red:#c62828;--red-l:#ffebee;--red-b:#e53935;
+  --purple:#6a1b9a;--purple-l:#f3e5f5;
+  --surface:#fff;--surface-2:#f0f2f5;--surface-3:#e4e6eb;
+  --border:#dde1e7;--border-l:#f0f2f5;
+  --ink:#050505;--ink-2:#65676b;--ink-3:#8a8d91;
+  --nav-h:56px;--bnav-h:58px;
+  --r:8px;--r2:12px;--r3:18px;
+  --sh:0 1px 3px rgba(0,0,0,.1);
+  --sh2:0 4px 16px rgba(0,0,0,.12);
+  --sh3:0 8px 32px rgba(0,0,0,.16);
+}
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--surface-2);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  padding-top:var(--nav-h);
+  padding-bottom:calc(var(--bnav-h) + env(safe-area-inset-bottom));
+}
+a{text-decoration:none;color:inherit}
+img{max-width:100%;display:block}
+button,input,textarea,select{font-family:inherit;font-size:inherit}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);position:fixed;top:0;left:0;right:0;z-index:900;height:var(--nav-h);box-shadow:var(--sh)}
+.topbar-inner{height:100%;display:flex;align-items:center;padding:0 10px;gap:8px;max-width:1100px;margin:0 auto}
+.brand{font-weight:900;font-size:1.55rem;color:var(--blue);letter-spacing:-.05em;flex-shrink:0;text-decoration:none;line-height:1}
+.search-wrap{flex:1;max-width:240px;position:relative}
+.search-box{width:100%;background:var(--surface-2);border:none;border-radius:50px;padding:8px 14px 8px 36px;font-size:.85rem;color:var(--ink);outline:none;transition:.2s}
+.search-box:focus{background:var(--surface-3)}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:.8rem;pointer-events:none}
+.topbar-center{display:flex;align-items:center;gap:0;flex:1;justify-content:center}
+.tnav{display:flex;align-items:center;justify-content:center;width:76px;height:44px;border-radius:var(--r);border:none;background:none;cursor:pointer;color:var(--ink-2);font-size:1.2rem;position:relative;transition:.15s;text-decoration:none}
+.tnav:hover{background:var(--surface-2)}
+.tnav.active{color:var(--blue)}
+.tnav.active::after{content:'';position:absolute;bottom:-6px;left:0;right:0;height:3px;background:var(--blue);border-radius:3px 3px 0 0}
+.topbar-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.nav-icon-btn{width:38px;height:38px;background:var(--surface-2);border-radius:50%;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;color:var(--ink);font-size:.95rem;position:relative;transition:.15s;flex-shrink:0;text-decoration:none}
+.nav-icon-btn:hover{background:var(--surface-3)}
+.nav-badge{position:absolute;top:-1px;right:-1px;background:var(--red-b);color:#fff;min-width:17px;height:17px;border-radius:50px;font-size:.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface);padding:0 3px}
+.nav-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:#fff;cursor:pointer;border:none;flex-shrink:0;text-decoration:none;background:linear-gradient(135deg,var(--blue),#64b5f6);overflow:hidden}
+.nav-avatar img{width:100%;height:100%;object-fit:cover}
+.nav-btn{padding:7px 14px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-weight:700;font-size:.82rem;cursor:pointer;text-decoration:none;transition:.15s}
+.nav-btn:hover{background:var(--blue-d)}
+.nav-btn-o{padding:6px 12px;background:none;color:var(--blue);border:1.5px solid var(--blue-m);border-radius:var(--r);font-weight:700;font-size:.82rem;cursor:pointer;text-decoration:none;transition:.15s}
+.nav-btn-o:hover{background:var(--blue-l)}
+
+/* ── DROPDOWN ── */
+.dd{position:relative}
+.dd-menu{position:absolute;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:6px;min-width:200px;box-shadow:var(--sh3);display:none;z-index:300}
+.dd:hover .dd-menu,.dd:focus-within .dd-menu{display:block}
+.dd-item{display:flex;align-items:center;gap:10px;padding:9px 12px;color:var(--ink-2);text-decoration:none;border-radius:var(--r);font-size:.85rem;font-weight:500;transition:.12s;border:none;background:none;cursor:pointer;width:100%;text-align:left}
+.dd-item:hover{background:var(--surface-2);color:var(--ink)}
+.dd-item.red{color:var(--red-b)}
+.dd-item.red:hover{background:var(--red-l)}
+.dd-sep{height:1px;background:var(--border);margin:4px 0}
+.dd-user{padding:12px;border-bottom:1px solid var(--border);margin-bottom:4px;display:flex;align-items:center;gap:10px}
+.dd-user-ava{width:40px;height:40px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,var(--blue),#64b5f6);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff}
+.dd-user-ava img{width:100%;height:100%;object-fit:cover}
+.dd-user-name{font-weight:700;font-size:.88rem}
+.dd-user-role{font-size:.73rem;color:var(--ink-2)}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:900;background:var(--surface);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom)}
+.bnav-inner{display:flex;justify-content:space-around;padding:6px 0 4px}
+.bnav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 8px;border:none;background:none;cursor:pointer;color:var(--ink-2);font-size:1.15rem;flex:1;transition:.12s;text-decoration:none;min-width:0}
+.bnav-item.active{color:var(--blue)}
+.bnav-label{font-size:.58rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:58px}
+.bnav-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+.bnav-badge{position:absolute;top:-4px;right:-8px;background:var(--red-b);color:#fff;min-width:16px;height:16px;border-radius:50px;font-size:.56rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid var(--surface)}
+
+/* ── FLASH ── */
+.flash-zone{position:fixed;top:calc(var(--nav-h) + 6px);left:50%;transform:translateX(-50%);z-index:1000;width:calc(100% - 24px);max-width:480px;pointer-events:none}
+.flash{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:var(--r2);font-size:.855rem;font-weight:600;animation:fIn .3s ease;box-shadow:var(--sh3);pointer-events:all;margin-bottom:6px}
+@keyframes fIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.flash-success{background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7}
+.flash-danger{background:var(--red-l);color:#b71c1c;border:1px solid #ef9a9a}
+.flash-info{background:var(--blue-l);color:#0d47a1;border:1px solid #90caf9}
+.flash-warning{background:var(--amber-l);color:#bf360c;border:1px solid #ffcc80}
+.flash-x{margin-left:auto;background:none;border:none;cursor:pointer;color:inherit;opacity:.5;font-size:1.1rem;line-height:1;flex-shrink:0}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:var(--r);font-size:.875rem;font-weight:700;cursor:pointer;border:none;transition:.15s;white-space:nowrap;text-decoration:none}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue-d)}
+.btn-success{background:var(--green-b);color:#fff}
+.btn-danger{background:var(--red-b);color:#fff}
+.btn-warning{background:var(--amber-b);color:#fff}
+.btn-wa{background:#25d366;color:#fff}
+.btn-wa:hover{background:#1ebe5c}
+.btn-call{background:#1877f2;color:#fff}
+.btn-outline{background:transparent;color:var(--ink-2);border:1.5px solid var(--border)}
+.btn-outline:hover{background:var(--surface-3)}
+.btn-outline-primary{background:transparent;color:var(--blue);border:1.5px solid var(--blue-m)}
+.btn-outline-primary:hover{background:var(--blue-l)}
+.btn-sm{padding:6px 13px;font-size:.78rem;border-radius:6px}
+.btn-lg{padding:13px 26px;font-size:.95rem}
+.btn-block{width:100%}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border-radius:var(--r2);box-shadow:var(--sh);overflow:hidden;border:1px solid var(--border)}
+.card-p{padding:16px}
+.card-p-lg{padding:20px 24px}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:50px;font-size:.68rem;font-weight:700}
+.badge-blue{background:var(--blue-l);color:#0d47a1}
+.badge-green{background:var(--green-l);color:var(--green)}
+.badge-amber{background:var(--amber-l);color:var(--amber)}
+.badge-red{background:var(--red-l);color:var(--red)}
+.badge-purple{background:var(--purple-l);color:var(--purple)}
+.badge-gray{background:var(--surface-3);color:var(--ink-2)}
+.badge-pendente{background:var(--amber-l);color:var(--amber)}
+.badge-aprovado{background:var(--green-l);color:var(--green)}
+.badge-rejeitado{background:var(--red-l);color:var(--red)}
+.badge-active{background:var(--green-l);color:var(--green)}
+.badge-suspended{background:var(--amber-l);color:var(--amber)}
+.badge-blocked{background:var(--red-l);color:var(--red)}
+
+/* ── FORMS ── */
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:.79rem;font-weight:700;color:var(--ink-2);margin-bottom:5px;letter-spacing:.01em}
+.form-label .req{color:var(--red-b)}
+.form-control,.form-select{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--r);font-size:.9rem;color:var(--ink);outline:none;transition:.2s;background:var(--surface)}
+.form-control:focus,.form-select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(24,119,242,.1)}
+.form-control::placeholder{color:var(--ink-3)}
+textarea.form-control{resize:vertical;min-height:90px;line-height:1.5}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2365676b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+.form-hint{font-size:.73rem;color:var(--ink-3);margin-top:4px}
+.input-icon-wrap{position:relative}
+.input-icon-wrap .form-control{padding-left:36px}
+.input-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:.82rem;pointer-events:none}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.photo-preview{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--border);background:var(--surface-3);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.photo-preview img{width:100%;height:100%;object-fit:cover}
+
+/* ── ADMIN LAYOUT ── */
+.admin-wrap{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - var(--nav-h))}
+.admin-side{background:var(--surface);border-right:1px solid var(--border);padding:12px 8px;position:sticky;top:var(--nav-h);height:calc(100vh - var(--nav-h));overflow-y:auto}
+.admin-body{padding:20px;background:var(--surface-2);min-height:calc(100vh - var(--nav-h))}
+.a-sec-lbl{font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-3);padding:10px 10px 4px}
+.a-link{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r);color:var(--ink-2);text-decoration:none;font-size:.855rem;font-weight:500;transition:.12s;margin-bottom:1px}
+.a-link:hover{background:var(--surface-2);color:var(--ink)}
+.a-link.active{background:var(--blue-l);color:var(--blue);font-weight:700}
+.a-link i{width:17px;text-align:center}
+.a-badge{margin-left:auto;background:var(--red-b);color:#fff;border-radius:50px;font-size:.63rem;font-weight:800;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.a-badge.amber{background:var(--amber-b)}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:14px;display:flex;align-items:center;gap:10px}
+.stat-ico{width:42px;height:42px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.ico-blue{background:var(--blue-l);color:var(--blue)}
+.ico-green{background:var(--green-l);color:var(--green-b)}
+.ico-amber{background:var(--amber-l);color:var(--amber-b)}
+.ico-purple{background:var(--purple-l);color:var(--purple)}
+.ico-red{background:var(--red-l);color:var(--red-b)}
+.stat-val{font-size:1.5rem;font-weight:900;line-height:1;color:var(--ink)}
+.stat-lbl{font-size:.7rem;color:var(--ink-2);margin-top:2px;font-weight:500}
+
+/* ── FILTER TABS ── */
+.f-tabs{display:flex;gap:3px;background:var(--surface-3);padding:3px;border-radius:var(--r);flex-wrap:wrap}
+.f-tab{padding:6px 14px;border-radius:6px;font-size:.8rem;font-weight:700;color:var(--ink-2);text-decoration:none;transition:.12s;border:none;background:none;cursor:pointer;white-space:nowrap}
+.f-tab.active,.f-tab:hover{background:var(--surface);color:var(--blue);box-shadow:var(--sh)}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r2);border:1px solid var(--border);background:var(--surface)}
+table{width:100%;border-collapse:collapse;min-width:480px}
+thead th{padding:10px 14px;background:var(--surface-2);font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);text-align:left;border-bottom:1px solid var(--border)}
+tbody td{padding:12px 14px;font-size:.855rem;border-bottom:1px solid var(--border-l);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--surface-2)}
+
+/* ── USER ITEM ── */
+.user-item{display:flex;align-items:center;gap:9px}
+.u-ava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.82rem;color:#fff;flex-shrink:0;overflow:hidden}
+.u-ava img{width:100%;height:100%;object-fit:cover}
+.u-name{font-weight:700;font-size:.87rem}
+.u-sub{font-size:.73rem;color:var(--ink-2);margin-top:1px}
+
+/* ── LIST ── */
+.list-card-hdr{padding:13px 16px;border-bottom:1px solid var(--border-l);display:flex;align-items:center;justify-content:space-between}
+.list-card-hdr h3{font-size:.92rem;font-weight:700}
+.list-row{padding:12px 16px;border-bottom:1px solid var(--border-l);display:flex;align-items:center;gap:10px}
+.list-row:last-child{border-bottom:none}
+.list-row:hover{background:var(--surface-2)}
+.list-row-info{flex:1;min-width:0}
+.list-row-acts{display:flex;gap:5px;flex-shrink:0}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:40px 20px;color:var(--ink-2)}
+.empty i{font-size:2.2rem;display:block;margin-bottom:10px;opacity:.35}
+.empty h3{font-size:.95rem;font-weight:700;margin-bottom:4px;color:var(--ink-2)}
+.empty p{font-size:.83rem;color:var(--ink-3)}
+
+/* ── ACTION BTNS ── */
+.act-btn{width:30px;height:30px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:.15s;text-decoration:none}
+.act-approve{background:var(--green-l);color:var(--green)}
+.act-approve:hover{background:var(--green-b);color:#fff}
+.act-reject{background:var(--red-l);color:var(--red-b)}
+.act-reject:hover{background:var(--red-b);color:#fff}
+.act-eye{background:var(--blue-l);color:var(--blue)}
+.act-eye:hover{background:var(--blue);color:#fff}
+.act-del{background:var(--red-l);color:var(--red-b)}
+.act-del:hover{background:var(--red-b);color:#fff}
+
+/* ── DASH SIDEBAR ── */
+.dash-wrap{display:grid;grid-template-columns:260px 1fr;gap:16px;max-width:1100px;margin:0 auto;padding:16px 12px}
+.dash-side{position:sticky;top:calc(var(--nav-h) + 10px);height:fit-content;display:flex;flex-direction:column;gap:10px}
+.cover-box{height:100px;background:linear-gradient(135deg,#0d47a1,var(--blue) 50%,#64b5f6);position:relative;border-radius:var(--r2) var(--r2) 0 0}
+.cover-ava{position:absolute;bottom:-30px;left:16px;width:72px;height:72px;border-radius:50%;border:3px solid var(--surface);overflow:hidden;background:linear-gradient(135deg,var(--blue),#64b5f6);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.6rem;color:#fff}
+.cover-ava img{width:100%;height:100%;object-fit:cover}
+.cover-ava-edit{position:absolute;bottom:-30px;left:68px;width:24px;height:24px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.6rem;border:2px solid var(--surface);cursor:pointer;text-decoration:none;z-index:2}
+.side-info{padding:40px 16px 14px}
+.side-name{font-weight:800;font-size:.98rem}
+.side-role{font-size:.77rem;color:var(--ink-2);margin-top:2px}
+.side-stats{display:flex;justify-content:space-around;padding:12px 0 0;border-top:1px solid var(--border-l);margin-top:10px}
+.sstat{text-align:center}
+.sstat-n{font-weight:900;font-size:1rem;color:var(--ink)}
+.sstat-l{font-size:.65rem;color:var(--ink-2);font-weight:500}
+.s-menu{padding:8px}
+.s-nav-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:var(--r);color:var(--ink-2);text-decoration:none;font-size:.855rem;font-weight:600;transition:.12s;border:none;background:none;cursor:pointer;width:100%;text-align:left}
+.s-nav-item:hover,.s-nav-item.active{background:var(--blue-l);color:var(--blue)}
+.s-nav-item.red{color:var(--red-b)}
+.s-nav-item.red:hover{background:var(--red-l)}
+.s-nav-item i{width:15px;text-align:center;font-size:.82rem}
+.s-divider{height:1px;background:var(--border);margin:5px 0}
+
+/* ── PAGE HEADER ── */
+.pg-hdr{margin-bottom:16px}
+.pg-title{font-size:1.25rem;font-weight:900;color:var(--ink)}
+.pg-sub{font-size:.8rem;color:var(--ink-2);margin-top:2px}
+.pg-hdr-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+
+/* ── TUTOR CARD ── */
+.tutor-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;transition:.2s}
+.tutor-card:hover{box-shadow:var(--sh2);border-color:var(--blue-m)}
+.tc-photo{width:100%;height:160px;object-fit:cover;background:var(--surface-2)}
+.tc-ava{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;color:#fff;flex-shrink:0;overflow:hidden}
+.tc-ava img{width:100%;height:100%;object-fit:cover}
+.disc-chip{display:inline-flex;background:var(--blue-l);color:#0d47a1;padding:2px 8px;border-radius:50px;font-size:.7rem;font-weight:700;margin:2px}
+
+/* ── REQUEST CARD ── */
+.req-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:14px;margin-bottom:10px;border-left:4px solid var(--border)}
+.req-card.pendente{border-left-color:var(--amber-b)}
+.req-card.aprovado{border-left-color:var(--green-b)}
+.req-card.rejeitado{border-left-color:var(--red-b)}
+
+/* ── SEARCH ── */
+.search-full{position:relative;margin-bottom:12px}
+.search-full input{width:100%;padding:10px 14px 10px 38px;border:1.5px solid var(--border);border-radius:50px;font-size:.88rem;outline:none;transition:.2s;background:var(--surface)}
+.search-full input:focus{border-color:var(--blue)}
+.search-full i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:.82rem}
+
+/* ── CHIPS ── */
+.chips-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;flex-wrap:wrap}
+.chips-row::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:5px 13px;border-radius:50px;border:1.5px solid var(--border);background:var(--surface);font-size:.78rem;font-weight:700;cursor:pointer;transition:.12s;color:var(--ink-2);white-space:nowrap;text-decoration:none}
+.chip:hover,.chip.active{border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+
+/* ── OPP CARD ── */
+.opp-photo{width:100%;height:150px;object-fit:cover;background:linear-gradient(135deg,var(--blue-l),var(--blue-m))}
+.opp-cat{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;font-weight:800;padding:3px 8px;border-radius:50px;margin-bottom:7px}
+
+/* ── FAB ── */
+.fab{position:fixed;bottom:calc(var(--bnav-h) + env(safe-area-inset-bottom) + 12px);right:14px;width:52px;height:52px;background:var(--blue);color:#fff;border-radius:50%;border:none;font-size:1.3rem;cursor:pointer;box-shadow:0 4px 20px rgba(24,119,242,.5);display:none;align-items:center;justify-content:center;z-index:800;transition:.15s;text-decoration:none}
+.fab:hover{background:var(--blue-d)}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:14px 0}
+
+/* ── WA CONTACT ── */
+.contact-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .admin-wrap{grid-template-columns:1fr}
+  .admin-side{display:none}
+  .admin-body{padding:12px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .dash-wrap{grid-template-columns:1fr;padding:8px}
+  .dash-side{position:static}
+  .topbar-center{display:none}
+  .bottom-nav{display:block}
+  .fab{display:flex}
+}
+@media(max-width:600px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .row-2{grid-template-columns:1fr}
+  table{min-width:340px}
+  .pg-hdr-row{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a href="{% if current_user.is_authenticated %}{{ url_for('dashboard') }}{% else %}{{ url_for('index') }}{% endif %}" class="brand">SkilloraX</a>
+    {% if current_user.is_authenticated %}
+    <div class="search-wrap">
+      <i class="fas fa-search search-icon"></i>
+      <input class="search-box" type="text" placeholder="Pesquisar...">
+    </div>
+    <div class="topbar-center">
+      <a href="{{ url_for('dashboard') }}" class="tnav {% if request.endpoint == 'dashboard' %}active{% endif %}" title="Painel">
+        <i class="fas fa-home"></i>
+      </a>
+      <a href="{{ url_for('explore') }}" class="tnav {% if request.endpoint == 'explore' %}active{% endif %}" title="Explicadores">
+        <i class="fas fa-chalkboard-teacher"></i>
+      </a>
+      <a href="{{ url_for('alunos') }}" class="tnav {% if request.endpoint == 'alunos' %}active{% endif %}" title="Alunos">
+        <i class="fas fa-user-graduate"></i>
+      </a>
+      <a href="{{ url_for('oportunidades') }}" class="tnav {% if request.endpoint == 'oportunidades' %}active{% endif %}" title="Oportunidades">
+        <i class="fas fa-star"></i>
+      </a>
+      {% if current_user.role == 'admin' %}
+      <a href="{{ url_for('admin_panel') }}" class="tnav {% if 'admin' in request.endpoint %}active{% endif %}" title="Admin">
+        <i class="fas fa-shield-alt"></i>
+      </a>
+      {% endif %}
+    </div>
+    <div class="topbar-right">
+      {% set unread = current_user.notifications | selectattr('is_read','equalto',False) | list | length %}
+      <a href="{{ url_for('dashboard') }}" class="nav-icon-btn">
+        <i class="fas fa-bell"></i>
+        {% if unread > 0 %}<span class="nav-badge">{{ unread if unread < 10 else '9+' }}</span>{% endif %}
+      </a>
+      <div class="dd">
+        <a href="{{ url_for('profile_edit') }}" class="nav-avatar">
+          {% if current_user.photo_url %}<img src="{{ current_user.photo_url }}" alt="">{% else %}{{ current_user.full_name[0].upper() }}{% endif %}
+        </a>
+        <div class="dd-menu">
+          <div class="dd-user">
+            <div class="dd-user-ava">{% if current_user.photo_url %}<img src="{{ current_user.photo_url }}" alt="">{% else %}{{ current_user.full_name[0].upper() }}{% endif %}</div>
+            <div><div class="dd-user-name">{{ current_user.full_name }}</div><div class="dd-user-role">{{ current_user.role|title }}</div></div>
+          </div>
+          <a href="{{ url_for('dashboard') }}" class="dd-item"><i class="fas fa-th-large"></i> Meu Painel</a>
+          <a href="{{ url_for('profile_edit') }}" class="dd-item"><i class="fas fa-user-edit"></i> Editar Perfil</a>
+          {% if current_user.role == 'student' %}<a href="{{ url_for('request_create') }}" class="dd-item"><i class="fas fa-paper-plane"></i> Novo Pedido</a>{% endif %}
+          {% if current_user.role == 'tutor' %}<a href="{{ url_for('tutor_service_create') }}" class="dd-item"><i class="fas fa-plus-circle"></i> Novo Serviço</a>{% endif %}
+          {% if current_user.role == 'admin' %}<div class="dd-sep"></div><a href="{{ url_for('admin_panel') }}" class="dd-item"><i class="fas fa-shield-alt"></i> Painel Admin</a>{% endif %}
+          <div class="dd-sep"></div>
+          <a href="{{ url_for('logout') }}" class="dd-item red"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div style="flex:1"></div>
+    <div class="topbar-right">
+      <a href="{{ url_for('login') }}" class="nav-btn-o">Entrar</a>
+      <a href="{{ url_for('register_student') }}" class="nav-btn">Registar</a>
+    </div>
+    {% endif %}
+  </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-zone" id="flashZone">
+  {% for cat, msg in messages %}
+  <div class="flash flash-{{ cat }}">
+    <i class="fas fa-{% if cat == 'success' %}check-circle{% elif cat == 'danger' %}exclamation-circle{% elif cat == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+    <span>{{ msg }}</span>
+    <button class="flash-x" onclick="this.parentElement.remove()">×</button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+{% block content %}{% endblock %}
+
+{% if current_user.is_authenticated %}
+{% set unread_m = current_user.notifications | selectattr('is_read','equalto',False) | list | length %}
+<nav class="bottom-nav">
+  <div class="bnav-inner">
+    <a href="{{ url_for('dashboard') }}" class="bnav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+      <i class="fas fa-home"></i><span class="bnav-label">Início</span>
+    </a>
+    <a href="{{ url_for('explore') }}" class="bnav-item {% if request.endpoint == 'explore' %}active{% endif %}">
+      <i class="fas fa-chalkboard-teacher"></i><span class="bnav-label">Explicadores</span>
+    </a>
+    <a href="{{ url_for('alunos') }}" class="bnav-item {% if request.endpoint == 'alunos' %}active{% endif %}">
+      <i class="fas fa-user-graduate"></i><span class="bnav-label">Alunos</span>
+    </a>
+    <a href="{{ url_for('oportunidades') }}" class="bnav-item {% if request.endpoint == 'oportunidades' %}active{% endif %}">
+      <i class="fas fa-star"></i><span class="bnav-label">Oport.</span>
+    </a>
+    <a href="{{ url_for('profile_edit') }}" class="bnav-item {% if request.endpoint == 'profile_edit' %}active{% endif %}">
+      <div class="bnav-wrap">
+        <div style="width:26px;height:26px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--blue),#64b5f6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.7rem;color:#fff">
+          {% if current_user.photo_url %}<img src="{{ current_user.photo_url }}" alt="" style="width:100%;height:100%;object-fit:cover">{% else %}{{ current_user.full_name[0].upper() }}{% endif %}
+        </div>
+        {% if unread_m > 0 %}<span class="bnav-badge">{{ unread_m }}</span>{% endif %}
+      </div>
+      <span class="bnav-label">Perfil</span>
+    </a>
+  </div>
+</nav>
+{% else %}
+<nav class="bottom-nav">
+  <div class="bnav-inner">
+    <a href="{{ url_for('index') }}" class="bnav-item {% if request.endpoint == 'index' %}active{% endif %}"><i class="fas fa-home"></i><span class="bnav-label">Início</span></a>
+    <a href="{{ url_for('explore') }}" class="bnav-item"><i class="fas fa-search"></i><span class="bnav-label">Explorar</span></a>
+    <a href="{{ url_for('login') }}" class="bnav-item"><i class="fas fa-sign-in-alt"></i><span class="bnav-label">Entrar</span></a>
+    <a href="{{ url_for('register_student') }}" class="bnav-item"><i class="fas fa-user-plus"></i><span class="bnav-label">Registar</span></a>
+  </div>
+</nav>
+{% endif %}
+
+<script>
+setTimeout(()=>{document.querySelectorAll('.flash').forEach(el=>{el.style.transition='opacity .4s';el.style.opacity='0';setTimeout(()=>el.remove(),400)})},5000);
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

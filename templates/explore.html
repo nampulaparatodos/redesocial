@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}Explicadores — SkilloraX{% endblock %}
+{% block content %}
+<div style="max-width:1100px;margin:0 auto;padding:16px 12px 80px">
+  <div class="pg-hdr-row">
+    <div class="pg-hdr" style="margin-bottom:0">
+      <div class="pg-title">Explicadores</div>
+      <div class="pg-sub">Encontra o explicador ideal — com fotos reais e contacto directo</div>
+    </div>
+    {% if current_user.is_authenticated and current_user.role == 'student' %}
+    <a href="{{ url_for('request_create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Novo Pedido</a>
+    {% endif %}
+  </div>
+
+  <!-- Search & Filters -->
+  <div class="card card-p" style="margin-bottom:14px">
+    <form method="get">
+      <div class="search-full">
+        <i class="fas fa-search"></i>
+        <input name="q" value="{{ q }}" placeholder="Pesquisar por disciplina, nome do explicador...">
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select name="lesson_type" class="form-select" style="flex:1;min-width:130px">
+          <option value="">Modalidade: Todas</option>
+          <option value="online" {% if lesson_type=='online' %}selected{% endif %}>🌐 Online</option>
+          <option value="presencial" {% if lesson_type=='presencial' %}selected{% endif %}>📍 Presencial</option>
+          <option value="ambos" {% if lesson_type=='ambos' %}selected{% endif %}>✅ Ambas</option>
+        </select>
+        <select name="province" class="form-select" style="flex:1;min-width:130px">
+          <option value="">Província: Todas</option>
+          {% for p in ['Maputo Cidade','Maputo','Gaza','Inhambane','Sofala','Manica','Tete','Zambezia','Nampula','Niassa','Cabo Delgado'] %}
+          <option value="{{ p }}" {% if province==p %}selected{% endif %}>{{ p }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> Filtrar</button>
+        {% if q or province or lesson_type %}<a href="{{ url_for('explore') }}" class="btn btn-outline btn-sm">Limpar</a>{% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Discipline chips -->
+  <div class="chips-row" style="margin-bottom:14px">
+    <a href="{{ url_for('explore') }}" class="chip {% if not q %}active{% endif %}">Todos</a>
+    {% for d in disciplines %}
+    <a href="{{ url_for('explore', q=d.name) }}" class="chip {% if q==d.name %}active{% endif %}">{{ d.name }}</a>
+    {% endfor %}
+  </div>
+
+  {% if services %}
+  <div style="font-size:.8rem;color:var(--ink-2);margin-bottom:12px">{{ services|length }} explicador{% if services|length!=1 %}es{% endif %} encontrado{% if services|length!=1 %}s{% endif %}</div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+    {% for s in services %}
+    <div class="tutor-card">
+      <!-- Photo -->
+      {% if s.photo_url or s.tutor.photo_url %}
+      <img class="tc-photo" src="{{ s.photo_url or s.tutor.photo_url }}" alt="{{ s.tutor.full_name }}" onerror="this.style.display='none'">
+      {% else %}
+      <div class="tc-photo" style="display:flex;align-items:center;justify-content:center;font-size:3rem;color:var(--blue-m);background:var(--blue-l)"><i class="fas fa-user"></i></div>
+      {% endif %}
+
+      <div style="padding:12px">
+        <!-- Header -->
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px">
+          <div class="tc-ava" style="width:44px;height:44px;background:linear-gradient(135deg,{% if loop.index%3==0 %}#6a1b9a,#ab47bc{% elif loop.index%2==0 %}#e65100,#fb8c00{% else %}#0d47a1,var(--blue){% endif %});flex-shrink:0">
+            {% if s.tutor.photo_url %}<img src="{{ s.tutor.photo_url }}" alt="">{% else %}{{ s.tutor.full_name[0].upper() }}{% endif %}
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:800;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.tutor.full_name }}</div>
+            <div style="font-size:.73rem;color:var(--ink-2)">
+              {{ s.lesson_type|title }}{% if s.province %} · {{ s.province }}{% endif %}
+            </div>
+          </div>
+          {% if s.price %}<div style="font-size:.78rem;font-weight:800;color:var(--green-b);flex-shrink:0">{{ s.price }}</div>{% endif %}
+        </div>
+
+        <!-- Disciplines -->
+        <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px">
+          {% for d in s.disciplines.split(',')[:4] %}<span class="disc-chip">{{ d.strip() }}</span>{% endfor %}
+          {% if s.disciplines.split(',')|length > 4 %}<span class="disc-chip" style="background:var(--surface-3);color:var(--ink-2)">+{{ s.disciplines.split(',')|length - 4 }}</span>{% endif %}
+        </div>
+
+        <!-- Description -->
+        {% if s.description %}
+        <div style="font-size:.8rem;color:var(--ink-2);margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.45">{{ s.description }}</div>
+        {% endif %}
+
+        {% if s.schedule %}
+        <div style="font-size:.73rem;color:var(--ink-3);margin-bottom:8px"><i class="fas fa-clock"></i> {{ s.schedule }}</div>
+        {% endif %}
+
+        <!-- Contact Buttons -->
+        {% if current_user.is_authenticated %}
+        <div class="contact-row">
+          {% if s.tutor.whatsapp %}
+          <a href="https://wa.me/{{ s.tutor.whatsapp | replace('+','') | replace(' ','') | replace('-','') }}" target="_blank" class="btn btn-wa btn-sm" style="flex:1"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+          {% endif %}
+          {% if s.tutor.phone %}
+          <a href="tel:{{ s.tutor.phone }}" class="btn btn-call btn-sm" style="flex:1"><i class="fas fa-phone"></i> Ligar</a>
+          {% endif %}
+          {% if not s.tutor.whatsapp and not s.tutor.phone %}
+          {% if current_user.role == 'student' %}
+          <a href="{{ url_for('request_create') }}" class="btn btn-primary btn-sm btn-block"><i class="fas fa-paper-plane"></i> Solicitar</a>
+          {% endif %}
+          {% endif %}
+        </div>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="btn btn-outline btn-sm btn-block" style="margin-top:4px"><i class="fas fa-lock"></i> Entra para contactar</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty card card-p">
+    <i class="fas fa-chalkboard-teacher"></i>
+    <h3>Nenhum explicador encontrado</h3>
+    <p>{% if q or province or lesson_type %}Tenta outros filtros.{% else %}Ainda não há explicadores aprovados.{% endif %}</p>
+  </div>
+  {% endif %}
+</div>
+
+{% if current_user.is_authenticated and current_user.role == 'student' %}
+<a href="{{ url_for('request_create') }}" class="fab"><i class="fas fa-plus"></i></a>
+{% endif %}
+{% endblock %}

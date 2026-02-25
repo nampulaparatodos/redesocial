@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Painel Admin — SkilloraX{% endblock %}
+{% block content %}
+<div class="admin-wrap">
+  <aside class="admin-side">
+    <div style="padding:10px 4px 8px">
+      <div style="font-weight:900;font-size:1rem;color:var(--blue);padding:0 8px 10px;border-bottom:1px solid var(--border);margin-bottom:6px"><i class="fas fa-shield-alt"></i> Admin</div>
+      <div class="a-sec-lbl">Aprovações</div>
+      <a href="{{ url_for('admin_services') }}" class="a-link"><i class="fas fa-chalkboard-teacher"></i> Serviços de Explicadores{% if pending_services > 0 %}<span class="a-badge">{{ pending_services }}</span>{% endif %}</a>
+      <a href="{{ url_for('admin_requests') }}" class="a-link"><i class="fas fa-user-graduate"></i> Pedidos de Alunos{% if pending_requests > 0 %}<span class="a-badge amber">{{ pending_requests }}</span>{% endif %}</a>
+      <div class="a-sec-lbl">Gestão</div>
+      <a href="{{ url_for('admin_users') }}" class="a-link"><i class="fas fa-users"></i> Utilizadores</a>
+      <a href="{{ url_for('admin_opportunities') }}" class="a-link"><i class="fas fa-star"></i> Oportunidades</a>
+      <a href="{{ url_for('admin_disciplines') }}" class="a-link"><i class="fas fa-book"></i> Disciplinas</a>
+      <div class="a-sec-lbl">Sistema</div>
+      <a href="{{ url_for('admin_logs') }}" class="a-link"><i class="fas fa-history"></i> Registos</a>
+      <a href="{{ url_for('admin_panel') }}" class="a-link active"><i class="fas fa-th-large"></i> Painel Geral</a>
+    </div>
+  </aside>
+  <div class="admin-body">
+    <div class="pg-hdr"><div class="pg-title">Painel de Administração</div><div class="pg-sub">Bem-vindo, {{ current_user.full_name }}!</div></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-ico ico-amber"><i class="fas fa-clock"></i></div><div><div class="stat-val">{{ pending_services }}</div><div class="stat-lbl">Serviços Pendentes</div></div></div>
+      <div class="stat-card"><div class="stat-ico ico-blue"><i class="fas fa-paper-plane"></i></div><div><div class="stat-val">{{ pending_requests }}</div><div class="stat-lbl">Pedidos Pendentes</div></div></div>
+      <div class="stat-card"><div class="stat-ico ico-green"><i class="fas fa-user-graduate"></i></div><div><div class="stat-val">{{ total_students }}</div><div class="stat-lbl">Alunos</div></div></div>
+      <div class="stat-card"><div class="stat-ico ico-purple"><i class="fas fa-chalkboard-teacher"></i></div><div><div class="stat-val">{{ total_tutors }}</div><div class="stat-lbl">Explicadores</div></div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      {% for href, ico, col, title, sub in [
+        (url_for('admin_services'),'fas fa-chalkboard-teacher','ico-amber','Serviços de Explicadores',pending_services|string+' pendente(s)'),
+        (url_for('admin_requests'),'fas fa-user-graduate','ico-blue','Pedidos de Alunos',pending_requests|string+' pendente(s)'),
+        (url_for('admin_users'),'fas fa-users','ico-green','Gerir Utilizadores',(total_students+total_tutors)|string+' registados'),
+        (url_for('admin_disciplines'),'fas fa-book','ico-purple','Disciplinas','Adicionar novas disciplinas')
+      ] %}
+      <a href="{{ href }}" class="card card-p" style="display:flex;align-items:center;gap:10px;text-decoration:none;transition:.2s" onmouseover="this.style.boxShadow='var(--sh2)'" onmouseout="this.style.boxShadow=''">
+        <div class="stat-ico {{ col }}"><i class="{{ ico }}"></i></div>
+        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:.87rem">{{ title }}</div><div style="font-size:.75rem;color:var(--ink-2)">{{ sub }}</div></div>
+        <i class="fas fa-chevron-right" style="color:var(--ink-3);font-size:.75rem"></i>
+      </a>
+      {% endfor %}
+    </div>
+    <div class="card">
+      <div class="list-card-hdr"><h3><i class="fas fa-history" style="color:var(--ink-2)"></i> Actividade Recente</h3><a href="{{ url_for('admin_logs') }}" style="font-size:.78rem;color:var(--blue);font-weight:700">Ver todos</a></div>
+      {% if recent_logs %}{% for log in recent_logs %}
+      <div class="list-row">
+        <div class="u-ava" style="background:linear-gradient(135deg,var(--blue),#42a5f5)">{{ log.admin.full_name[0].upper() }}</div>
+        <div style="flex:1;min-width:0"><div style="font-size:.84rem">{{ log.action }}</div><div style="font-size:.7rem;color:var(--ink-3);margin-top:2px">{{ log.admin.full_name }} · {{ log.created_at.strftime('%d/%m/%Y %H:%M') }}</div></div>
+      </div>
+      {% endfor %}{% else %}
+      <div class="empty" style="padding:20px"><p>Sem registos ainda.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

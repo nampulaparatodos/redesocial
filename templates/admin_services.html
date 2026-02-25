@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Serviços de Explicadores — Admin · SkilloraX{% endblock %}
+{% block content %}
+<div class="admin-wrap">
+  <aside class="admin-side">
+    <div style="padding:10px 4px 8px">
+      <div style="font-weight:900;font-size:1rem;color:var(--blue);padding:0 8px 10px;border-bottom:1px solid var(--border);margin-bottom:6px"><i class="fas fa-shield-alt"></i> Admin</div>
+      <div class="a-sec-lbl">Aprovações</div>
+      <a href="{{ url_for('admin_services') }}" class="a-link active"><i class="fas fa-chalkboard-teacher"></i> Serviços de Explicadores{% if pending_services > 0 %}<span class="a-badge">{{ pending_services }}</span>{% endif %}</a>
+      <a href="{{ url_for('admin_requests') }}" class="a-link"><i class="fas fa-user-graduate"></i> Pedidos de Alunos{% if pending_requests > 0 %}<span class="a-badge amber">{{ pending_requests }}</span>{% endif %}</a>
+      <div class="a-sec-lbl">Gestão</div>
+      <a href="{{ url_for('admin_users') }}" class="a-link"><i class="fas fa-users"></i> Utilizadores</a>
+      <a href="{{ url_for('admin_opportunities') }}" class="a-link"><i class="fas fa-star"></i> Oportunidades</a>
+      <a href="{{ url_for('admin_disciplines') }}" class="a-link"><i class="fas fa-book"></i> Disciplinas</a>
+      <div class="a-sec-lbl">Sistema</div>
+      <a href="{{ url_for('admin_logs') }}" class="a-link"><i class="fas fa-history"></i> Registos</a>
+      <a href="{{ url_for('admin_panel') }}" class="a-link"><i class="fas fa-th-large"></i> Painel Geral</a>
+    </div>
+  </aside>
+  <div class="admin-body">
+    <div class="pg-hdr"><div class="pg-title">Serviços de Explicadores</div><div class="pg-sub">Analisa os formulários e aprova ou rejeita</div></div>
+    <div class="f-tabs" style="margin-bottom:14px;width:100%">
+      <a href="{{ url_for('admin_services', status='pendente') }}" class="f-tab {% if status_filter=='pendente' %}active{% endif %}">⏳ Pendentes{% if pending_services > 0 %} <span style="background:var(--amber-b);color:#fff;border-radius:50px;padding:0 6px;font-size:.65rem;font-weight:800;margin-left:3px">{{ pending_services }}</span>{% endif %}</a>
+      <a href="{{ url_for('admin_services', status='aprovado') }}" class="f-tab {% if status_filter=='aprovado' %}active{% endif %}">✅ Aprovados</a>
+      <a href="{{ url_for('admin_services', status='rejeitado') }}" class="f-tab {% if status_filter=='rejeitado' %}active{% endif %}">❌ Rejeitados</a>
+    </div>
+
+    {% if services %}
+    <!-- Mobile cards -->
+    <div class="mobile-list" style="display:none">
+      {% for s in services %}
+      <div class="card card-p" style="margin-bottom:10px">
+        <div style="display:flex;gap:10px">
+          <div style="flex-shrink:0">
+            {% if s.photo_url or s.tutor.photo_url %}
+            <img src="{{ s.photo_url or s.tutor.photo_url }}" alt="" style="width:60px;height:60px;border-radius:var(--r2);object-fit:cover;border:1.5px solid var(--border)">
+            {% else %}
+            <div class="u-ava" style="width:52px;height:52px;border-radius:var(--r2);font-size:1.1rem;background:linear-gradient(135deg,var(--blue),#42a5f5)">{{ s.tutor.full_name[0].upper() }}</div>
+            {% endif %}
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:800;font-size:.9rem">{{ s.tutor.full_name }}</div>
+            <div style="font-size:.73rem;color:var(--ink-2)">{{ s.tutor.phone or '' }}{% if s.tutor.whatsapp %} · WA: {{ s.tutor.whatsapp }}{% endif %}</div>
+            <div style="margin:6px 0;display:flex;flex-wrap:wrap;gap:3px">{% for d in s.disciplines.split(',') %}<span class="disc-chip">{{ d.strip() }}</span>{% endfor %}</div>
+            <div style="font-size:.77rem;color:var(--ink-2);display:flex;gap:10px;flex-wrap:wrap">
+              <span>{{ s.lesson_type|title }}</span>{% if s.province %}<span>{{ s.province }}</span>{% endif %}{% if s.price %}<span style="color:var(--green-b);font-weight:700">{{ s.price }}</span>{% endif %}
+            </div>
+            {% if s.description %}<div style="font-size:.78rem;color:var(--ink-2);margin-top:5px">{{ s.description[:100] }}{% if s.description|length > 100 %}...{% endif %}</div>{% endif %}
+            <div style="font-size:.7rem;color:var(--ink-3);margin-top:4px">{{ s.created_at.strftime('%d/%m/%Y') }}</div>
+            {% if status_filter == 'pendente' %}
+            <div style="display:flex;gap:6px;margin-top:10px">
+              <form method="post" action="{{ url_for('admin_service_action', sid=s.id, action='aprovado') }}" style="flex:1"><button class="btn btn-success btn-sm btn-block" type="submit"><i class="fas fa-check"></i> Aprovar</button></form>
+              <form method="post" action="{{ url_for('admin_service_action', sid=s.id, action='rejeitado') }}" style="flex:1"><button class="btn btn-danger btn-sm btn-block" type="submit"><i class="fas fa-times"></i> Rejeitar</button></form>
+            </div>
+            {% else %}<span class="badge badge-{{ s.status }}" style="margin-top:8px;display:inline-flex">{{ s.status|title }}</span>{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Desktop table -->
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Explicador</th><th>Foto</th><th>Disciplinas</th><th>Modalidade</th><th>Localização</th><th>Preço</th><th>WhatsApp</th><th>Data</th><th>Estado</th>{% if status_filter=='pendente' %}<th>Ações</th>{% endif %}</tr></thead>
+        <tbody>
+          {% for s in services %}
+          <tr>
+            <td>
+              <div class="user-item">
+                <div class="u-ava" style="background:linear-gradient(135deg,var(--blue),#42a5f5)">
+                  {% if s.tutor.photo_url %}<img src="{{ s.tutor.photo_url }}" alt="">{% else %}{{ s.tutor.full_name[0].upper() }}{% endif %}
+                </div>
+                <div><div class="u-name">{{ s.tutor.full_name }}</div><div class="u-sub">{{ s.tutor.phone or '—' }}</div></div>
+              </div>
+            </td>
+            <td>{% if s.photo_url %}<img src="{{ s.photo_url }}" alt="" style="width:40px;height:40px;border-radius:var(--r);object-fit:cover">{% else %}<span style="color:var(--ink-3);font-size:.78rem">Sem foto</span>{% endif %}</td>
+            <td>{% for d in s.disciplines.split(',')[:3] %}<span class="disc-chip">{{ d.strip() }}</span>{% endfor %}</td>
+            <td style="font-size:.82rem">{{ s.lesson_type|title }}</td>
+            <td style="font-size:.82rem">{{ s.province or '—' }}</td>
+            <td style="font-size:.82rem;color:var(--green-b);font-weight:700">{{ s.price or '—' }}</td>
+            <td style="font-size:.78rem">{% if s.tutor.whatsapp %}<a href="https://wa.me/{{ s.tutor.whatsapp|replace('+','')|replace(' ','')|replace('-','') }}" target="_blank" style="color:#25d366"><i class="fab fa-whatsapp"></i> {{ s.tutor.whatsapp }}</a>{% else %}—{% endif %}</td>
+            <td style="font-size:.78rem;color:var(--ink-2)">{{ s.created_at.strftime('%d/%m/%y') }}</td>
+            <td><span class="badge badge-{{ s.status }}">{{ s.status|title }}</span></td>
+            {% if status_filter=='pendente' %}
+            <td><div style="display:flex;gap:5px">
+              <form method="post" action="{{ url_for('admin_service_action', sid=s.id, action='aprovado') }}"><button class="act-btn act-approve" type="submit" title="Aprovar"><i class="fas fa-check"></i></button></form>
+              <form method="post" action="{{ url_for('admin_service_action', sid=s.id, action='rejeitado') }}"><button class="act-btn act-reject" type="submit" title="Rejeitar"><i class="fas fa-times"></i></button></form>
+            </div></td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty card card-p"><i class="fas fa-chalkboard-teacher"></i><h3>Nenhum serviço {{ status_filter }}</h3><p>Não há formulários pendentes neste momento.</p></div>
+    {% endif %}
+  </div>
+</div>
+<style>@media(max-width:700px){.tbl-wrap{display:none}.mobile-list{display:block!important}}</style>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Entrar — SkilloraX{% endblock %}
+{% block content %}
+<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:20px 14px">
+  <div style="width:100%;max-width:380px">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-weight:900;font-size:2.4rem;color:var(--blue);letter-spacing:-.05em">SkilloraX</div>
+      <div style="font-size:.88rem;color:var(--ink-2);margin-top:4px">Conectando alunos e explicadores em Moçambique 🇲🇿</div>
+    </div>
+    <div class="card card-p">
+      <div style="font-weight:800;font-size:1.05rem;margin-bottom:16px;text-align:center">Entrar na tua conta</div>
+      <form method="post">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <div class="input-icon-wrap"><i class="fas fa-envelope input-icon"></i><input name="email" type="email" required class="form-control" placeholder="o-teu@email.com" autofocus></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Senha</label>
+          <div class="input-icon-wrap"><i class="fas fa-lock input-icon"></i><input name="password" type="password" required class="form-control" placeholder="A tua senha"></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-bottom:14px"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+      </form>
+      <div style="text-align:center;font-size:.85rem;color:var(--ink-2);margin-bottom:10px">Não tens conta?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <a href="{{ url_for('register_student') }}" class="btn btn-outline-primary btn-sm" style="text-align:center"><i class="fas fa-user-graduate"></i> Sou Aluno</a>
+        <a href="{{ url_for('register_tutor') }}" class="btn btn-sm" style="text-align:center;background:var(--amber-l);color:var(--amber);border:1.5px solid #ffcc80"><i class="fas fa-chalkboard-teacher"></i> Sou Explicador</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

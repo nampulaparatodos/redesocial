@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Registar como Explicador — SkilloraX{% endblock %}
+{% block content %}
+<div style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:20px 14px">
+  <div style="width:100%;max-width:480px">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-weight:900;font-size:2rem;color:var(--blue)">SkilloraX</div>
+      <div style="font-size:.85rem;color:var(--ink-2)">Regista-te como explicador</div>
+    </div>
+    <div class="card card-p">
+      <div style="display:flex;gap:2px;background:var(--surface-3);padding:3px;border-radius:var(--r);margin-bottom:16px">
+        <a href="{{ url_for('register_student') }}" style="flex:1;padding:8px;text-align:center;font-size:.85rem;font-weight:700;color:var(--ink-2);border-radius:6px;text-decoration:none">Aluno</a>
+        <div style="flex:1;padding:8px;text-align:center;background:var(--surface);border-radius:6px;font-size:.85rem;font-weight:800;color:var(--amber)"><i class="fas fa-chalkboard-teacher"></i> Explicador</div>
+      </div>
+
+      <!-- Photo Preview -->
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;padding:12px;background:var(--surface-2);border-radius:var(--r2)">
+        <div id="photoPreview" class="photo-preview" style="width:64px;height:64px">
+          <i class="fas fa-user" style="font-size:1.5rem;color:var(--ink-3)"></i>
+        </div>
+        <div style="flex:1">
+          <div class="form-label">Foto de Perfil <span class="req">*</span></div>
+          <input type="url" id="photoUrl" class="form-control" placeholder="https://link-da-tua-foto.jpg" required oninput="previewPhoto(this.value)" style="font-size:.82rem">
+          <div class="form-hint">Obrigatório · Usa uma foto profissional real</div>
+        </div>
+      </div>
+
+      <form method="post" id="regForm">
+        <input type="hidden" name="photo_url" id="photoUrlHidden">
+        <div class="form-group"><label class="form-label">Nome Completo <span class="req">*</span></label><input name="full_name" required class="form-control" placeholder="O teu nome completo"></div>
+        <div class="row-2">
+          <div class="form-group"><label class="form-label">Email <span class="req">*</span></label><input name="email" type="email" required class="form-control" placeholder="email@exemplo.com"></div>
+          <div class="form-group"><label class="form-label">Telefone <span class="req">*</span></label><input name="phone" required type="tel" class="form-control" placeholder="+258 8X XXX XXXX"></div>
+        </div>
+        <div class="form-group"><label class="form-label">WhatsApp <span class="req">*</span></label>
+          <div class="input-icon-wrap"><i class="fab fa-whatsapp input-icon" style="color:#25d366"></i><input name="whatsapp" required type="tel" class="form-control" placeholder="+258 8X XXX XXXX"></div>
+        </div>
+        <div class="row-2">
+          <div class="form-group"><label class="form-label">Senha <span class="req">*</span></label><input name="password" type="password" required minlength="6" class="form-control" placeholder="Mínimo 6 caracteres"></div>
+          <div class="form-group"><label class="form-label">Província <span class="req">*</span></label>
+            <select name="province" required class="form-select">
+              <option value="">Seleccionar...</option>
+              {% for p in ['Maputo Cidade','Maputo','Gaza','Inhambane','Sofala','Manica','Tete','Zambezia','Nampula','Niassa','Cabo Delgado'] %}<option>{{ p }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Apresentação</label>
+          <textarea name="description" class="form-control" rows="3" placeholder="Formação, experiência de ensino, método, resultados..."></textarea>
+        </div>
+        <div style="background:var(--amber-l);border-radius:var(--r);padding:10px 12px;font-size:.8rem;color:var(--amber);margin-bottom:12px">
+          <i class="fas fa-info-circle"></i> Após o registo, cria o teu serviço. O Admin aprova antes de ficares visível.
+        </div>
+        <button type="submit" class="btn btn-lg btn-block" style="background:linear-gradient(135deg,var(--amber-b),#e65100);color:#fff" onclick="syncPhoto()">
+          <i class="fas fa-chalkboard-teacher"></i> Criar Conta de Explicador
+        </button>
+      </form>
+      <div style="text-align:center;margin-top:12px;font-size:.85rem;color:var(--ink-2)">Já tens conta? <a href="{{ url_for('login') }}" style="color:var(--blue);font-weight:700">Entrar</a></div>
+    </div>
+  </div>
+</div>
+<script>
+function previewPhoto(url) {
+  const p = document.getElementById('photoPreview');
+  if(url && url.startsWith('http')) {
+    p.innerHTML = '<img src="'+url+'" onerror="this.parentElement.innerHTML=\'<i class=\\\"fas fa-user\\\" style=\\\"font-size:1.5rem;color:var(--ink-3)\\\"></i>\'">';
+  }
+}
+function syncPhoto() {
+  document.getElementById('photoUrlHidden').value = document.getElementById('photoUrl').value;
+}
+</script>
+{% endblock %}

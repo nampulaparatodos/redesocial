@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Registos — Admin · SkilloraX{% endblock %}
+{% block content %}
+<div class="admin-wrap">
+  <aside class="admin-side">
+    <div style="padding:10px 4px 8px">
+      <div style="font-weight:900;font-size:1rem;color:var(--blue);padding:0 8px 10px;border-bottom:1px solid var(--border);margin-bottom:6px"><i class="fas fa-shield-alt"></i> Admin</div>
+      <a href="{{ url_for('admin_services') }}" class="a-link"><i class="fas fa-chalkboard-teacher"></i> Serviços</a>
+      <a href="{{ url_for('admin_requests') }}" class="a-link"><i class="fas fa-user-graduate"></i> Pedidos</a>
+      <a href="{{ url_for('admin_users') }}" class="a-link"><i class="fas fa-users"></i> Utilizadores</a>
+      <a href="{{ url_for('admin_opportunities') }}" class="a-link"><i class="fas fa-star"></i> Oportunidades</a>
+      <a href="{{ url_for('admin_disciplines') }}" class="a-link"><i class="fas fa-book"></i> Disciplinas</a>
+      <a href="{{ url_for('admin_logs') }}" class="a-link active"><i class="fas fa-history"></i> Registos</a>
+      <a href="{{ url_for('admin_panel') }}" class="a-link"><i class="fas fa-th-large"></i> Painel</a>
+    </div>
+  </aside>
+  <div class="admin-body">
+    <div class="pg-hdr"><div class="pg-title">Registos de Actividade</div><div class="pg-sub">Histórico de todas as acções dos administradores</div></div>
+    {% if logs %}
+    <div class="card">
+      {% for log in logs %}
+      <div class="list-row">
+        <div class="u-ava" style="width:34px;height:34px;border-radius:50%;font-size:.78rem;background:linear-gradient(135deg,var(--blue),#42a5f5);flex-shrink:0">{{ log.admin.full_name[0].upper() }}</div>
+        <div style="flex:1;min-width:0"><div style="font-size:.84rem">{{ log.action }}</div><div style="font-size:.7rem;color:var(--ink-3);margin-top:2px">{{ log.admin.full_name }} · {{ log.created_at.strftime('%d/%m/%Y às %H:%M') }}</div></div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty card card-p"><i class="fas fa-history"></i><h3>Sem registos</h3><p>As acções dos admins aparecerão aqui.</p></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

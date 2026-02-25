@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %}Pedidos de Alunos — Admin · SkilloraX{% endblock %}
+{% block content %}
+<div class="admin-wrap">
+  <aside class="admin-side">
+    <div style="padding:10px 4px 8px">
+      <div style="font-weight:900;font-size:1rem;color:var(--blue);padding:0 8px 10px;border-bottom:1px solid var(--border);margin-bottom:6px"><i class="fas fa-shield-alt"></i> Admin</div>
+      <div class="a-sec-lbl">Aprovações</div>
+      <a href="{{ url_for('admin_services') }}" class="a-link"><i class="fas fa-chalkboard-teacher"></i> Serviços{% if pending_services > 0 %}<span class="a-badge">{{ pending_services }}</span>{% endif %}</a>
+      <a href="{{ url_for('admin_requests') }}" class="a-link active"><i class="fas fa-user-graduate"></i> Pedidos de Alunos{% if pending_requests > 0 %}<span class="a-badge amber">{{ pending_requests }}</span>{% endif %}</a>
+      <div class="a-sec-lbl">Gestão</div>
+      <a href="{{ url_for('admin_users') }}" class="a-link"><i class="fas fa-users"></i> Utilizadores</a>
+      <a href="{{ url_for('admin_opportunities') }}" class="a-link"><i class="fas fa-star"></i> Oportunidades</a>
+      <a href="{{ url_for('admin_disciplines') }}" class="a-link"><i class="fas fa-book"></i> Disciplinas</a>
+      <div class="a-sec-lbl">Sistema</div>
+      <a href="{{ url_for('admin_logs') }}" class="a-link"><i class="fas fa-history"></i> Registos</a>
+      <a href="{{ url_for('admin_panel') }}" class="a-link"><i class="fas fa-th-large"></i> Painel Geral</a>
+    </div>
+  </aside>
+  <div class="admin-body">
+    <div class="pg-hdr"><div class="pg-title">Pedidos de Alunos</div><div class="pg-sub">Ao aprovar, ambos recebem os contactos (WhatsApp + telefone) mutuamente</div></div>
+
+    <!-- Filters -->
+    <div class="card card-p" style="margin-bottom:14px">
+      <form method="get" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+        <input type="hidden" name="status" value="{{ status_filter }}">
+        <div style="flex:2;min-width:140px">
+          <div class="form-label" style="font-size:.72rem">Pesquisar</div>
+          <div class="input-icon-wrap" style="margin:0"><i class="fas fa-search input-icon"></i><input name="q" class="form-control" value="{{ q }}" placeholder="Nome, disciplina..."></div>
+        </div>
+        <div style="flex:1;min-width:120px">
+          <div class="form-label" style="font-size:.72rem">Universidade</div>
+          <input name="university" class="form-control" value="{{ university }}" placeholder="UEM, UP...">
+        </div>
+        <div style="flex:1;min-width:120px">
+          <div class="form-label" style="font-size:.72rem">Província</div>
+          <select name="province" class="form-select">
+            <option value="">Todas</option>
+            {% for p in ['Maputo Cidade','Maputo','Gaza','Inhambane','Sofala','Manica','Tete','Zambezia','Nampula','Niassa','Cabo Delgado'] %}
+            <option value="{{ p }}" {% if province==p %}selected{% endif %}>{{ p }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
+        {% if q or province or university %}<a href="{{ url_for('admin_requests', status=status_filter) }}" class="btn btn-outline btn-sm">Limpar</a>{% endif %}
+      </form>
+    </div>
+
+    <div class="f-tabs" style="margin-bottom:14px;width:100%">
+      <a href="{{ url_for('admin_requests', status='pendente') }}" class="f-tab {% if status_filter=='pendente' %}active{% endif %}">⏳ Pendentes{% if pending_requests > 0 %} <span style="background:var(--amber-b);color:#fff;border-radius:50px;padding:0 6px;font-size:.65rem;font-weight:800;margin-left:3px">{{ pending_requests }}</span>{% endif %}</a>
+      <a href="{{ url_for('admin_requests', status='aprovado') }}" class="f-tab {% if status_filter=='aprovado' %}active{% endif %}">✅ Aprovados</a>
+      <a href="{{ url_for('admin_requests', status='rejeitado') }}" class="f-tab {% if status_filter=='rejeitado' %}active{% endif %}">❌ Rejeitados</a>
+    </div>
+
+    {% if requests %}
+    <!-- Mobile -->
+    <div class="mobile-list" style="display:none">
+      {% for r in requests %}
+      <div class="card card-p" style="margin-bottom:10px;border-left:4px solid {% if r.status=='pendente' %}var(--amber-b){% elif r.status=='aprovado' %}var(--green-b){% else %}var(--red-b){% endif %}">
+        <div style="display:flex;gap:10px">
+          <div style="flex-shrink:0">
+            {% if r.student.photo_url %}<img src="{{ r.student.photo_url }}" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--border)">
+            {% else %}<div class="u-ava" style="width:52px;height:52px;border-radius:50%;font-size:1rem;background:linear-gradient(135deg,var(--green-b),#1b5e20)">{{ r.student.full_name[0].upper() }}</div>{% endif %}
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:800;font-size:.9rem">{{ r.student.full_name }}</div>
+            <div style="font-size:.73rem;color:var(--ink-2)">{{ r.student.phone or '—' }}{% if r.student.whatsapp %} · WA: {{ r.student.whatsapp }}{% endif %}</div>
+            {% if r.university %}<div style="font-size:.72rem;color:var(--ink-3)">{{ r.university }}{% if r.province %} · {{ r.province }}{% endif %}</div>{% endif %}
+            <div style="margin:8px 0;background:var(--surface-2);border-radius:var(--r);padding:8px 10px">
+              <div style="font-weight:700;font-size:.87rem;color:var(--blue)"><i class="fas fa-book"></i> {{ r.discipline }}</div>
+              <div style="font-size:.78rem;color:var(--ink-2);margin-top:3px">{{ r.lesson_type|title }}{% if r.availability %} · {{ r.availability }}{% endif %}</div>
+              {% if r.message %}<div style="font-size:.78rem;color:var(--ink-2);margin-top:4px;font-style:italic">"{{ r.message }}"</div>{% endif %}
+            </div>
+            {% if r.tutor %}<div style="font-size:.78rem;background:var(--blue-l);border-radius:var(--r);padding:5px 8px;margin-bottom:6px">Explicador: <strong>{{ r.tutor.full_name }}</strong> · {{ r.tutor.phone }}</div>{% endif %}
+            <span class="badge badge-{{ r.status }}">{{ r.status|title }}</span>
+            {% if status_filter == 'pendente' %}
+            <div style="display:flex;gap:6px;margin-top:10px">
+              <form method="post" action="{{ url_for('admin_request_action', rid=r.id, action='aprovado') }}" style="flex:1"><button class="btn btn-success btn-sm btn-block" type="submit"><i class="fas fa-check"></i> Aprovar</button></form>
+              <form method="post" action="{{ url_for('admin_request_action', rid=r.id, action='rejeitado') }}" style="flex:1"><button class="btn btn-danger btn-sm btn-block" type="submit"><i class="fas fa-times"></i> Rejeitar</button></form>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Desktop table -->
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Aluno</th><th>Foto</th><th>Universidade</th><th>Província</th><th>Disciplina</th><th>Modalidade</th><th>Explicador Pret.</th><th>WhatsApp</th><th>Data</th><th>Estado</th>{% if status_filter=='pendente' %}<th>Ações</th>{% endif %}</tr></thead>
+        <tbody>
+          {% for r in requests %}
+          <tr>
+            <td>
+              <div class="user-item">
+                <div class="u-ava" style="background:linear-gradient(135deg,var(--green-b),#1b5e20)">
+                  {% if r.student.photo_url %}<img src="{{ r.student.photo_url }}" alt="">{% else %}{{ r.student.full_name[0].upper() }}{% endif %}
+                </div>
+                <div><div class="u-name">{{ r.student.full_name }}</div><div class="u-sub">{{ r.student.phone or '—' }}</div></div>
+              </div>
+            </td>
+            <td>{% if r.student.photo_url %}<img src="{{ r.student.photo_url }}" alt="" style="width:38px;height:38px;border-radius:50%;object-fit:cover">{% else %}<span style="color:var(--ink-3);font-size:.75rem">—</span>{% endif %}</td>
+            <td style="font-size:.8rem">{{ r.university or r.student.university or '—' }}</td>
+            <td style="font-size:.8rem">{{ r.province or '—' }}</td>
+            <td><strong style="font-size:.85rem">{{ r.discipline }}</strong></td>
+            <td style="font-size:.82rem">{{ r.lesson_type|title }}</td>
+            <td style="font-size:.8rem">{% if r.tutor %}<span style="color:var(--blue)">{{ r.tutor.full_name }}</span>{% else %}<span style="color:var(--ink-3)">Qualquer</span>{% endif %}</td>
+            <td style="font-size:.78rem">{% if r.student.whatsapp %}<a href="https://wa.me/{{ r.student.whatsapp|replace('+','')|replace(' ','')|replace('-','') }}" target="_blank" style="color:#25d366"><i class="fab fa-whatsapp"></i> {{ r.student.whatsapp }}</a>{% else %}—{% endif %}</td>
+            <td style="font-size:.78rem;color:var(--ink-2)">{{ r.created_at.strftime('%d/%m/%y') }}</td>
+            <td><span class="badge badge-{{ r.status }}">{{ r.status|title }}</span></td>
+            {% if status_filter=='pendente' %}
+            <td><div style="display:flex;gap:4px">
+              <form method="post" action="{{ url_for('admin_request_action', rid=r.id, action='aprovado') }}"><button class="act-btn act-approve" type="submit" title="Aprovar"><i class="fas fa-check"></i></button></form>
+              <form method="post" action="{{ url_for('admin_request_action', rid=r.id, action='rejeitado') }}"><button class="act-btn act-reject" type="submit" title="Rejeitar"><i class="fas fa-times"></i></button></form>
+            </div></td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty card card-p"><i class="fas fa-user-graduate"></i><h3>Nenhum pedido encontrado</h3><p>Tenta ajustar os filtros.</p></div>
+    {% endif %}
+  </div>
+</div>
+<style>@media(max-width:700px){.tbl-wrap{display:none}.mobile-list{display:block!important}}</style>
+{% endblock %}
