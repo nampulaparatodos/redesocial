@@ -2,3 +2,4 @@ Flask
 gunicorn
 flask-sqlalchemy==3.0.5
 flask-login==0.6.3
+flask-bcrypt==1.0.1
